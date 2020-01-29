@@ -20,29 +20,25 @@ public class RobotContainer {
 
   private static final double DEADZONE = 0.15;
 
-  public Joystick MAIN_CONTROLLER;
-  private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
-  private double value;
-  private POVButton MainDPadDown, MainDPadUp;
+  public Joystick main;
+  // private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
+  // private double value;
+  // private POVButton MainDPadDown, MainDPadUp;
 
   public RobotContainer() { 
-    
-  }
-
-  public void init() {
-    MAIN_CONTROLLER = new Joystick(Constants.MAIN_CONTROLLER);
+    main = new Joystick(Constants.MAIN_CONTROLLER);
     // ARM_CONTROLLER = new Joystick(Constants.ARM_CONTROLLER);
 
-    YButton = new JoystickButton(MAIN_CONTROLLER, 4);
-    AButton = new JoystickButton(MAIN_CONTROLLER, 1);
-    XButton = new JoystickButton(MAIN_CONTROLLER, 3);
-    BButton = new JoystickButton(MAIN_CONTROLLER, 2);
+    // YButton = new JoystickButton(MAIN_CONTROLLER, 4);
+    // AButton = new JoystickButton(MAIN_CONTROLLER, 1);
+    // XButton = new JoystickButton(MAIN_CONTROLLER, 3);
+    // BButton = new JoystickButton(MAIN_CONTROLLER, 2);
     // ArmBButton = new JoystickButton(ARM_CONTROLLER, 2);
     // ArmDPadUp = new POVButton(ARM_CONTROLLER, 0);
     // ArmDPadDown = new POVButton(ARM_CONTROLLER, 180);
-    RightBumper = new JoystickButton(MAIN_CONTROLLER, 6);
-    MainDPadUp = new POVButton(MAIN_CONTROLLER, 0);
-    MainDPadDown = new POVButton(MAIN_CONTROLLER, 180);
+    // RightBumper = new JoystickButton(MAIN_CONTROLLER, 6);
+    // MainDPadUp = new POVButton(MAIN_CONTROLLER, 0);
+    // MainDPadDown = new POVButton(MAIN_CONTROLLER, 180);
     // ArmDPadRight = new POVButton(ARM_CONTROLLER, 90);
     // ArmLeftBumper = new JoystickButton(ARM_CONTROLLER, 5);
     // ArmRightBumper = new JoystickButton(ARM_CONTROLLER, 6);
@@ -55,51 +51,52 @@ public class RobotContainer {
 
     //AButton.whenPressed(new TurnToLine(5));
   }
-  //Drivebase control
+
+  // Drivebase control
   public double getMainLeftJoyX() {
-    double value = MAIN_CONTROLLER.getRawAxis(0);
+    double value = main.getRawAxis(0);
     return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
   }
   
   public double getMainLeftJoyY() {
-    double value = MAIN_CONTROLLER.getRawAxis(1);
+    double value = main.getRawAxis(1);
     return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
   }
   
   //For tankdrive control (unused)
   public double getMainRightJoyY() {
-    double value = MAIN_CONTROLLER.getRawAxis(2);
+    double value = main.getRawAxis(2);
     return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
   }
 
   //Drivebase control
   public double getMainRightJoyX() {
-    double value = MAIN_CONTROLLER.getRawAxis(3);
+    double value = main.getRawAxis(3);
     return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
   }
 
   //Drivebase throttle
-  public double getMainRightTrigger() {
-    double value = MAIN_CONTROLLER.getRawAxis(3);
-    return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
-  }
+  // public double getMainRightTrigger() {
+  //   double value = MAIN_CONTROLLER.getRawAxis(3);
+  //   return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
+  // }
 
   //Climber wheel actuation & outtaking
-  public double getMainLeftTrigger() {
-    double value = MAIN_CONTROLLER.getRawAxis(2);
-    return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
-  }
+  // public double getMainLeftTrigger() {
+  //   double value = MAIN_CONTROLLER.getRawAxis(2);
+  //   return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
+  // }
 
   public boolean getMainBButtonPressed() {
-    return MAIN_CONTROLLER.getRawButtonPressed(2);
+    return main.getRawButtonPressed(2);
   }
 
   public boolean getMainBButton() {
-    return MAIN_CONTROLLER.getRawButton(2);
+    return main.getRawButton(2);
   }
 
   public boolean getMainLeftBumperPressed() {
-    return MAIN_CONTROLLER.getRawButtonPressed(5);
+    return main.getRawButtonPressed(5);
   }
 
   // public boolean getArmLeftBumper() {
@@ -128,7 +125,7 @@ public class RobotContainer {
   // }
 
   public boolean getMainYButtonPressed() {
-    return MAIN_CONTROLLER.getRawButtonPressed(4);
+    return main.getRawButtonPressed(4);
   }
 
   //Arm control

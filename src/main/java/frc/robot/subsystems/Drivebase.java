@@ -97,7 +97,7 @@ public class Drivebase extends SubsystemBase {
 
 
     rightMotor.setInverted(true);
-    rightMotor.setInverted(true);
+    rightMotorFollower.setInverted(true);
     // rightMotorThree.setInverted(true);
 
     leftMotorFollower.follow(leftMotor);

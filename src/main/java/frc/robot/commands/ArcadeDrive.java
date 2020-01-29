@@ -31,11 +31,11 @@ public class ArcadeDrive extends CommandBase {
 
     @Override
     public void execute() {
-        double throttle = 0.85 - 0.65 * Robot.oi.getMainRightTrigger();
+        double throttle = 0.85;// - 0.65 * Robot.oi.getMainRightTrigger();
         double turn = Robot.oi.getMainRightJoyX() * (Robot.oi.getMainLeftJoyY() == 0 ? 0.6 : 0.35);
-        if (Robot.oi.getMainRightTrigger() > 0.5) {
-            turn *= 1.3;
-        }
+        // if (Robot.oi.getMainRightTrigger() > 0.5) {
+        //     turn *= 1.3;
+        // }
         if (reversed) {
             throttle *= -1;
             turn *= -1;
