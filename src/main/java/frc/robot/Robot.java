@@ -7,9 +7,19 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.subsystems.Drivebase;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -20,7 +30,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  public static RobotContainer oi;
+  public static Drivebase drivebase;
+  public static PowerDistributionPanel pdp;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -30,7 +42,10 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    oi = new RobotContainer();
+    pdp = new PowerDistributionPanel();
+    // ahrs = new AHRS(SPI.Port.kMXP);
+    drivebase = new Drivebase();
   }
 
   /**
@@ -65,7 +80,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = oi.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -110,4 +125,33 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
   }
+
+  public static void masterTalon(TalonSRX motor) {
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configContinuousCurrentLimit(12, 0);
+    motor.configPeakCurrentLimit(14, 0);
+    motor.configPeakCurrentDuration(50, 0);
+    motor.enableCurrentLimit(true);
+    motor.configOpenloopRamp(0.2, 0);
+    motor.configClosedloopRamp(0.2, 0);
+  }
+
+  public static void initTalon(TalonSRX motor) {
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.neutralOutput();
+    motor.setSensorPhase(false);
+    motor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+    motor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+    motor.configNominalOutputForward(0.0, 0);
+    motor.configNominalOutputReverse(0.0, 0);
+  }
+
+  public static void initVictor(VictorSPX motor) {
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.neutralOutput();
+    motor.setSensorPhase(false);
+    motor.configNominalOutputForward(0.0, 0);
+    motor.configNominalOutputReverse(0.0, 0);
+  }
+
 }

@@ -16,4 +16,25 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  // //CAN Motor Controller Mappings
+  // LEFT_MOTOR_ONE(1),
+  // LEFT_MOTOR_TWO(2),
+  // // LEFT_MOTOR_THREE(3),
+  // RIGHT_MOTOR_ONE(4),
+  // RIGHT_MOTOR_TWO(5),
+  // // RIGHT_MOTOR_THREE(6),
+  // ARM_MOTOR(7),
+  // INTAKE_MOTOR(11),
+  // CLIMBER_WHEELS(12),
+  // HATCH_MOTOR(8),
+  // // CLIMBER_MOTOR(20),
+
+  // Controller Mappings
+  public final static int MAIN_CONTROLLER = 0;
+
+  // CAN Motor Controller Mappings
+  public final static int DRIVEBASE_LEFT_FOLLOWER_VICTOR = 2;
+  public final static int DRIVEBASE_LEFT_MAIN_TALON = 3;
+  public final static int DRIVEBASE_RIGHT_FOLLOWER_TALON = 4;
+  public final static int DRIVEBASE_RIGHT_MAIN_TALON = 5;
 }
