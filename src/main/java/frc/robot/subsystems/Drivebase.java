@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2018-2019 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -15,16 +15,17 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 // import com.kauailabs.navx.frc.AHRS.BoardAxis;
 // import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 
-// import edu.wpi.first.wpilibj.PIDController;
-// import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Joystick.AxisType;
 import edu.wpi.first.wpilibj.SerialPort.Port;
+// import edu.wpi.first.wpilibj.PIDController;
+// import edu.wpi.first.wpilibj.PIDOutput;
 // import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.ArcadeDrive;
@@ -56,8 +57,6 @@ public class Drivebase extends SubsystemBase {
   //in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
   public Drivebase() {
-
-    
     // turnController = new PIDController(P, I, D, Robot.ahrs, this);
     // turnController.setInputRange(-180.0f, 180.0f);
     // turnController.setOutputRange(-0.6, 0.6);
@@ -95,16 +94,13 @@ public class Drivebase extends SubsystemBase {
     // Robot.initVictor(rightMotorTwo);
     // Robot.initVictor(rightMotorThree);
 
-
     rightMotor.setInverted(true);
     rightMotorFollower.setInverted(true);
-    // rightMotorThree.setInverted(true);
-
-    leftMotorFollower.follow(leftMotor);
-    // leftMotorThree.follow(leftMotorOne);
-
     rightMotorFollower.follow(rightMotor);
-    // rightMotorThree.follow(rightMotorOne);
+
+    leftMotor.setInverted(false);
+    leftMotorFollower.setInverted(false);
+    leftMotorFollower.follow(leftMotor);
     
     // rightMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
     // leftMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
@@ -148,7 +144,6 @@ public class Drivebase extends SubsystemBase {
   //   turnController.reset();
   //   turnController.setSetpoint(angle);
   //   turnController.enable();
-    
   // }
 
   
