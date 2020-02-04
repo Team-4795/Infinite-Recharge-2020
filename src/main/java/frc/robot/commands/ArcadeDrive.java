@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 // import edu.wpi.first.networktables.NetworkTableInstance;
 
 import frc.robot.Robot;
-import frc.robot.subsystems.Drivebase;
 
 public class ArcadeDrive extends CommandBase {
 
