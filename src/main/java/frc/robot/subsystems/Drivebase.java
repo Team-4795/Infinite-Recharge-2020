@@ -19,9 +19,6 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Joystick.AxisType;
 import edu.wpi.first.wpilibj.SerialPort.Port;
-// import edu.wpi.first.wpilibj.PIDController;
-// import edu.wpi.first.wpilibj.PIDOutput;
-// import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
@@ -43,13 +40,17 @@ import frc.robot.Robot;
 import frc.robot.commands.ArcadeDrive;
 
 public class Drivebase extends SubsystemBase {
-  public final TalonSRX leftMotor;
-  private final VictorSPX leftMotorFollower;
-  // private final VictorSPX leftMotorThree;
-  public final TalonSRX rightMotor;
-  private final TalonSRX rightMotorFollower;
-  // private final VictorSPX rightMotorThree;
-  // public final PIDController turnController;
+  public static final double kMaxSpeed = 3.0; // meters per second
+  public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
+
+  private static final double kTrackWidth = 0.381 * 2; // meters
+  private static final double kWheelRadius = 0.0508; // meters
+  private static final int kEncoderResolution = 4096;
+
+  private static final double kP = 1; // TODO: tune PID
+  private static final double kI = 0;
+  private static final double kD = 0;
+  private static final double kF = 0;
 
   // private final static double P = -0.009;
   // private final static double I = 0.0;
@@ -66,7 +67,31 @@ public class Drivebase extends SubsystemBase {
   // private final int ENCODER_COUNTS_PER_REV = 4096;
   // public final double ENCODER_COUNTS_PER_FT = 4096;
   //in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
-  
+
+  public final TalonSRX leftMotor;
+  private final VictorSPX leftMotorFollower;
+  // private final VictorSPX leftMotorThree;
+  public final TalonSRX rightMotor;
+  private final TalonSRX rightMotorFollower;
+  // private final VictorSPX rightMotorThree;
+  // public final PIDController turnController;
+
+  private final Encoder m_leftEncoder = new Encoder(0, 1);
+  private final Encoder m_rightEncoder = new Encoder(2, 3);
+
+  private final AnalogGyro m_gyro = new AnalogGyro(0);
+
+  private final PIDController m_leftPIDController = new PIDController(kP, kI, kD, kF);
+  private final PIDController m_rightPIDController = new PIDController(kP, kI, kD, kF);
+
+  private final DifferentialDriveKinematics m_kinematics
+      = new DifferentialDriveKinematics(kTrackWidth);
+
+  private final DifferentialDriveOdometry m_odometry;
+
+  // Gains are for example purposes only - must be determined for your own robot!
+  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
+
   public Drivebase() {
     m_gyro.reset();
     // Set the distance per pulse for the drive encoders. We can simply use the
@@ -132,9 +157,6 @@ public class Drivebase extends SubsystemBase {
     // leftMotorOne.setSelectedSensorPosition(0);
   }
 
-  
-
-
   public void setMotors(double left, double right) {
     leftMotor.set(ControlMode.PercentOutput, left);
     rightMotor.set(ControlMode.PercentOutput, right);
@@ -170,7 +192,6 @@ public class Drivebase extends SubsystemBase {
   //   turnController.setSetpoint(angle);
   //   turnController.enable();
   // }
-
   
   // public void driveFeet(double feet) {
   //   this.resetEncoders();
@@ -182,44 +203,6 @@ public class Drivebase extends SubsystemBase {
   //   rightMotorOne.setSelectedSensorPosition(0);
   //   leftMotorOne.setSelectedSensorPosition(0);
   // }
-
-  // @Override
-  // public void pidWrite(double output) {
-  //   setMotors(output, -output);
-  // }
-
-  public static final double kMaxSpeed = 3.0; // meters per second
-  public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
-
-  private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kWheelRadius = 0.0508; // meters
-  private static final int kEncoderResolution = 4096;
-
-  private final SpeedController m_leftMaster = new PWMVictorSPX(1);
-  private final SpeedController m_leftFollower = new PWMVictorSPX(2);
-  private final SpeedController m_rightMaster = new PWMVictorSPX(3);
-  private final SpeedController m_rightFollower = new PWMVictorSPX(4);
-
-  private final Encoder m_leftEncoder = new Encoder(0, 1);
-  private final Encoder m_rightEncoder = new Encoder(2, 3);
-
-  private final SpeedControllerGroup m_leftGroup
-      = new SpeedControllerGroup(m_leftMaster, m_leftFollower);
-  private final SpeedControllerGroup m_rightGroup
-      = new SpeedControllerGroup(m_rightMaster, m_rightFollower);
-
-  private final AnalogGyro m_gyro = new AnalogGyro(0);
-
-  private final PIDController m_leftPIDController = new PIDController(1, 0, 0, 0);
-  private final PIDController m_rightPIDController = new PIDController(1, 0, 0, 0);
-
-  private final DifferentialDriveKinematics m_kinematics
-      = new DifferentialDriveKinematics(kTrackWidth);
-
-  private final DifferentialDriveOdometry m_odometry;
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
 
   /**
    * Constructs a differential drive object.
@@ -242,15 +225,15 @@ public class Drivebase extends SubsystemBase {
    * @param speeds The desired wheel speeds.
    */
   public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
-    final double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
-    final double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
+    double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
+    double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
 
-    final double leftOutput = m_leftPIDController.calculate(m_leftEncoder.getRate(),
+    double leftOutput = m_leftPIDController.calculate(m_leftEncoder.getRate(),
         speeds.leftMetersPerSecond);
-    final double rightOutput = m_rightPIDController.calculate(m_rightEncoder.getRate(),
+    double rightOutput = m_rightPIDController.calculate(m_rightEncoder.getRate(),
         speeds.rightMetersPerSecond);
-    m_leftGroup.setVoltage(leftOutput + leftFeedforward);
-    m_rightGroup.setVoltage(rightOutput + rightFeedforward);
+    leftMotor.set(ControlMode.PercentOutput, leftOutput + leftFeedforward);
+    rightMotor.set(ControlMode.PercentOutput, rightOutput + rightFeedforward);
   }
 
   /**
@@ -259,9 +242,8 @@ public class Drivebase extends SubsystemBase {
    * @param xSpeed Linear velocity in m/s.
    * @param rot    Angular velocity in rad/s.
    */
-  @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double rot) {
-    var wheelSpeeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, rot));
+    DifferentialDriveWheelSpeeds wheelSpeeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, rot));
     setSpeeds(wheelSpeeds);
   }
 

@@ -128,6 +128,9 @@ public class Robot extends TimedRobot {
 
   public static void masterTalon(TalonSRX motor) {
     motor.setNeutralMode(NeutralMode.Brake);
+    motor.neutralOutput();
+    motor.setSensorPhase(false);
+
     motor.configContinuousCurrentLimit(12, 0);
     motor.configPeakCurrentLimit(14, 0);
     motor.configPeakCurrentDuration(50, 0);
@@ -140,6 +143,7 @@ public class Robot extends TimedRobot {
     motor.setNeutralMode(NeutralMode.Brake);
     motor.neutralOutput();
     motor.setSensorPhase(false);
+    
     motor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
     motor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
     motor.configNominalOutputForward(0.0, 0);
@@ -150,6 +154,7 @@ public class Robot extends TimedRobot {
     motor.setNeutralMode(NeutralMode.Brake);
     motor.neutralOutput();
     motor.setSensorPhase(false);
+
     motor.configNominalOutputForward(0.0, 0);
     motor.configNominalOutputReverse(0.0, 0);
   }
