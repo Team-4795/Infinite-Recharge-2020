@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.SerialPort.Port;
 // import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -210,8 +210,8 @@ public class Drivebase extends SubsystemBase {
 
   private final AnalogGyro m_gyro = new AnalogGyro(0);
 
-  private final PIDController m_leftPIDController = new PIDController(1, 0, 0, 0, m_leftEncoder, m_leftPIDController);
-  private final PIDController m_rightPIDController = new PIDController(1, 0, 0, 0, m_leftEncoder, m_rightPIDController);
+  private final PIDController m_leftPIDController = new PIDController(1, 0, 0, 0);
+  private final PIDController m_rightPIDController = new PIDController(1, 0, 0, 0);
 
   private final DifferentialDriveKinematics m_kinematics
       = new DifferentialDriveKinematics(kTrackWidth);
