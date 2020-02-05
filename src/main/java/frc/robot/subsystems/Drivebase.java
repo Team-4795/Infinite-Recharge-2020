@@ -14,24 +14,15 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 // import com.kauailabs.navx.frc.AHRS.BoardAxis;
 // import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.Joystick.AxisType;
-import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
-import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -44,8 +35,7 @@ public class Drivebase extends SubsystemBase {
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
   private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kWheelRadius = 0.0508; // meters
-  private static final int kEncoderResolution = 4096;
+  private static final double kEncoderCountPerMeter = 4096; // TODO: tune
 
   private static final double kP = 1; // TODO: tune PID
   private static final double kI = 0;
@@ -65,19 +55,15 @@ public class Drivebase extends SubsystemBase {
 
   // private final double WHEEL_DIAMETER_IN = 8.0;
   // private final int ENCODER_COUNTS_PER_REV = 4096;
-  // public final double ENCODER_COUNTS_PER_FT = 4096;
   //in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
 
-  public final TalonSRX leftMotor;
+  private final TalonSRX leftMotor;
   private final VictorSPX leftMotorFollower;
   // private final VictorSPX leftMotorThree;
-  public final TalonSRX rightMotor;
+  private final TalonSRX rightMotor;
   private final TalonSRX rightMotorFollower;
   // private final VictorSPX rightMotorThree;
   // public final PIDController turnController;
-
-  private final Encoder m_leftEncoder = new Encoder(0, 1);
-  private final Encoder m_rightEncoder = new Encoder(2, 3);
 
   private final AnalogGyro m_gyro = new AnalogGyro(0);
 
@@ -97,11 +83,11 @@ public class Drivebase extends SubsystemBase {
     // Set the distance per pulse for the drive encoders. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
-    m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
-    m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    // m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    // m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
 
-    m_leftEncoder.reset();
-    m_rightEncoder.reset();
+    // m_leftEncoder.reset();
+    // m_rightEncoder.reset();
 
     m_odometry = new DifferentialDriveOdometry(getAngle());
 
@@ -169,13 +155,13 @@ public class Drivebase extends SubsystemBase {
   //   return rightMotorOne.getSelectedSensorPosition();
   // }
 
-  // public double getLeftEncoderFeet() {
-  //   return leftMotorOne.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
-  // }
+  public double getLeftEncoderMeters() {
+    return leftMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
+  }
 
-  // public double getRightEncoderFeet() {
-  //   return rightMotorOne.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
-  // }
+  public double getRightEncoderMeters() {
+    return rightMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
+  }
 
   // //should give velocity in ft per second
   // public double getLeftVelocity() {
@@ -228,9 +214,11 @@ public class Drivebase extends SubsystemBase {
     double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
     double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
 
-    double leftOutput = m_leftPIDController.calculate(m_leftEncoder.getRate(),
+    double leftOutput = m_leftPIDController.calculate(
+      leftMotor.getSelectedSensorVelocity() / kEncoderCountPerMeter,
         speeds.leftMetersPerSecond);
-    double rightOutput = m_rightPIDController.calculate(m_rightEncoder.getRate(),
+    double rightOutput = m_rightPIDController.calculate(
+      rightMotor.getSelectedSensorVelocity() / kEncoderCountPerMeter,
         speeds.rightMetersPerSecond);
     leftMotor.set(ControlMode.PercentOutput, leftOutput + leftFeedforward);
     rightMotor.set(ControlMode.PercentOutput, rightOutput + rightFeedforward);
@@ -251,7 +239,7 @@ public class Drivebase extends SubsystemBase {
    * Updates the field-relative position.
    */
   public void updateOdometry() {
-    m_odometry.update(getAngle(), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+    m_odometry.update(getAngle(), getLeftEncoderMeters(), getRightEncoderMeters());
   }
 
   @Override
