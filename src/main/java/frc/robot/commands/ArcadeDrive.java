@@ -10,7 +10,6 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 // import edu.wpi.first.networktables.NetworkTableInstance;
-
 import frc.robot.Robot;
 
 public class ArcadeDrive extends CommandBase {
@@ -32,19 +31,23 @@ public class ArcadeDrive extends CommandBase {
   @Override
   public void execute() {
     double throttle = 0.85 - 0.65 * Robot.oi.getMainRightTrigger();
+    double forward = Robot.oi.getMainLeftJoyY() * throttle;
     double turn = Robot.oi.getMainRightJoyX()
-      * (Robot.oi.getMainLeftJoyY() == 0 ? 0.6 : 0.35)
-      * (1 + 0.3 * Robot.oi.getMainRightTrigger());
+      * (forward == 0 ? 0.6 : 0.35)
+      * (1 + 0.3 * Robot.oi.getMainRightTrigger())
+      * throttle;
 
     if (Robot.oi.getMainRightBumperPressed()) reversed = !reversed;
     if (reversed) {
-      throttle *= -1;
-      turn *= -1;
+      forward *= -1;
     }
-
     SmartDashboard.putBoolean("Reversed Drivebase", reversed);
-    Robot.drivebase.setMotors((Robot.oi.getMainLeftJoyY() - turn) * throttle,
-            (Robot.oi.getMainLeftJoyY() + turn) * throttle);
+
+    if (Robot.oi.getMainBButton()) {
+      Robot.drivebase.drive(0.3, 0.2);
+    } else {
+      Robot.drivebase.setMotors(forward - turn, forward + turn);
+    }
 
     // double vel = Robot.drivebase.getLeftVelocity();
     // maxVel = Math.abs(vel) > Math.abs(maxVel) ? vel : maxVel;
