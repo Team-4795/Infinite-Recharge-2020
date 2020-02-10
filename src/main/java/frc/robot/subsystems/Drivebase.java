@@ -1,3 +1,4 @@
+
 /*----------------------------------------------------------------------------*/
 /* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
@@ -10,22 +11,25 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-// import com.kauailabs.navx.frc.AHRS;
-// import com.kauailabs.navx.frc.AHRS.BoardAxis;
-// import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
+import com.kauailabs.navx.frc.AHRS;
+import com.kauailabs.navx.frc.AHRS.BoardAxis;
+import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -37,6 +41,22 @@ public class Drivebase extends SubsystemBase {
   // private final VictorSPX leftMotorThree;
   public final TalonSRX rightMotor;
   private final TalonSRX rightMotorFollower;
+  public DifferentialDriveKinematics kinematics; 
+  public final double driveWidth; 
+  public DifferentialDriveOdometry odometry;
+  public AHRS gyro;
+  public Pose2d pose; 
+  public double ks;
+  public double kv; 
+  public SimpleMotorFeedforward feedforward;
+  public PIDController pidRight;
+  public PIDController pidLeft;
+  public final double rP = 0.0;
+  public final double rI = 0.0;
+  public final double rD = 0.0;
+  public final double lP = 0.0; 
+  public final double lI = 0.0;
+  public final double lD = 0.0;
   // private final VictorSPX rightMotorThree;
   // public final PIDController turnController;
 
@@ -51,25 +71,20 @@ public class Drivebase extends SubsystemBase {
   // private final double kF = .065;
   // public final int allowableError = 100;
 
-  // private final double WHEEL_DIAMETER_IN = 8.0;
-  // private final int ENCODER_COUNTS_PER_REV = 4096;
-  // public final double ENCODER_COUNTS_PER_FT = 4096;
-  //in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
+  private final double WHEEL_DIAMETER_IN = 8.0;
+  private final int ENCODER_COUNTS_PER_REV = 4096;
+  public final double ENCODER_COUNTS_PER_FT = 4096;
+  // in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
   public Drivebase() {
-    m_gyro.reset();
-    // Set the distance per pulse for the drive encoders. We can simply use the
-    // distance traveled for one rotation of the wheel divided by the encoder
-    // resolution.
-    m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
-    m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    driveWidth = 0.0;
+    kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(driveWidth));
+    odometry = new DifferentialDriveOdometry(getHeading());
+    gyro = new AHRS(SPI.Port.kMXP);
+    feedforward = new SimpleMotorFeedforward(ks, kv); 
+    pidRight = new PIDController(rP, rI, rD);
+    pidLeft = new PIDController(lP, lI, lD);
 
-    m_leftEncoder.reset();
-    m_rightEncoder.reset();
-
-    m_odometry = new DifferentialDriveOdometry(getAngle());
-
-    
     // turnController = new PIDController(P, I, D, Robot.ahrs, this);
     // turnController.setInputRange(-180.0f, 180.0f);
     // turnController.setOutputRange(-0.6, 0.6);
@@ -107,7 +122,6 @@ public class Drivebase extends SubsystemBase {
     // Robot.initVictor(rightMotorTwo);
     // Robot.initVictor(rightMotorThree);
 
-
     rightMotor.setInverted(true);
     rightMotorFollower.setInverted(true);
     // rightMotorThree.setInverted(true);
@@ -128,10 +142,34 @@ public class Drivebase extends SubsystemBase {
   
 
 
+  public Rotation2d getHeading() {
+    return Rotation2d.fromDegrees(-gyro.getAngle());
+  }
   public void setMotors(double left, double right) {
     leftMotor.set(ControlMode.PercentOutput, left);
     rightMotor.set(ControlMode.PercentOutput, right);
   }
+
+  public PIDController getLeftPID() {
+    return pidLeft;
+  }
+  public PIDController getRightPID() {
+    return pidRight;
+  }
+
+  public DifferentialDriveKinematics getKinematics() {
+    return kinematics;
+  }
+
+  public Pose2d getPose() {
+    return pose;
+  }
+
+  public SimpleMotorFeedforward getFeedForward() {
+    return feedforward;
+  }
+
+
   // public double getLeftEncoderCount() {
   //   return leftMotorOne.getSelectedSensorPosition();
   // }
@@ -140,22 +178,28 @@ public class Drivebase extends SubsystemBase {
   //   return rightMotorOne.getSelectedSensorPosition();
   // }
 
-  // public double getLeftEncoderFeet() {
-  //   return leftMotorOne.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
-  // }
+  public double getLeftEncoderFeet() {
+    return leftMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
+  }
 
-  // public double getRightEncoderFeet() {
-  //   return rightMotorOne.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
-  // }
+  public double getRightEncoderFeet() {
+    return rightMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
+  }
 
   // //should give velocity in ft per second
-  // public double getLeftVelocity() {
-  //   return leftMotorOne.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
-  // }
+  public double getLeftVelocity() {
+    return leftMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
+  }
 
-  // public double getRightVelocity() {
-  //   return rightMotorOne.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
-  // }
+  public double getRightVelocity() {
+    return rightMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
+  }
+
+  public void setOutput(double leftVoltage, double rightVoltage) {
+    leftMotor.set(null, leftVoltage/12);
+    rightMotor.set(null, rightVoltage/12);
+
+  }
 
   // public void TurnToAngle(double angle) {
   //   Robot.ahrs.reset();
@@ -182,92 +226,18 @@ public class Drivebase extends SubsystemBase {
   //   setMotors(output, -output);
   // }
 
-  public static final double kMaxSpeed = 3.0; // meters per second
-  public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
-
-  private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kWheelRadius = 0.0508; // meters
-  private static final int kEncoderResolution = 4096;
-
-  private final SpeedController m_leftMaster = new PWMVictorSPX(1);
-  private final SpeedController m_leftFollower = new PWMVictorSPX(2);
-  private final SpeedController m_rightMaster = new PWMVictorSPX(3);
-  private final SpeedController m_rightFollower = new PWMVictorSPX(4);
-
-  private final Encoder m_leftEncoder = new Encoder(0, 1);
-  private final Encoder m_rightEncoder = new Encoder(2, 3);
-
-  private final SpeedControllerGroup m_leftGroup
-      = new SpeedControllerGroup(m_leftMaster, m_leftFollower);
-  private final SpeedControllerGroup m_rightGroup
-      = new SpeedControllerGroup(m_rightMaster, m_rightFollower);
-
-  private final AnalogGyro m_gyro = new AnalogGyro(0);
-
-  private final PIDController m_leftPIDController = new PIDController(1, 0, 0, 0, m_leftEncoder, m_leftPIDController);
-  private final PIDController m_rightPIDController = new PIDController(1, 0, 0, 0, m_leftEncoder, m_rightPIDController);
-
-  private final DifferentialDriveKinematics m_kinematics
-      = new DifferentialDriveKinematics(kTrackWidth);
-
-  private final DifferentialDriveOdometry m_odometry;
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
-
-  /**
-   * Constructs a differential drive object.
-   * Sets the encoder distance per pulse and resets the gyro.
-   */
-
-  /**
-   * Returns the angle of the robot as a Rotation2d.
-   *
-   * @return The angle of the robot.
-   */
-  public Rotation2d getAngle() {
-    // Negating the angle because WPILib gyros are CW positive.
-    return Rotation2d.fromDegrees(-m_gyro.getAngle());
+  public DifferentialDriveWheelSpeeds getSpeeds() {
+   return new DifferentialDriveWheelSpeeds(
+        getLeftVelocity() / 7.29 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60,
+    getRightVelocity() / 7.29* 2 * Math.PI * Units.inchesToMeters(3.0)
+    / 60);
   }
+  
 
-  /**
-   * Sets the desired wheel speeds.
-   *
-   * @param speeds The desired wheel speeds.
-   */
-  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
-    final double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
-    final double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
-
-    final double leftOutput = m_leftPIDController.calculate(m_leftEncoder.getRate(),
-        speeds.leftMetersPerSecond);
-    final double rightOutput = m_rightPIDController.calculate(m_rightEncoder.getRate(),
-        speeds.rightMetersPerSecond);
-    m_leftGroup.setVoltage(leftOutput + leftFeedforward);
-    m_rightGroup.setVoltage(rightOutput + rightFeedforward);
-  }
-
-  /**
-   * Drives the robot with the given linear velocity and angular velocity.
-   *
-   * @param xSpeed Linear velocity in m/s.
-   * @param rot    Angular velocity in rad/s.
-   */
-  @SuppressWarnings("ParameterName")
-  public void drive(double xSpeed, double rot) {
-    var wheelSpeeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, rot));
-    setSpeeds(wheelSpeeds);
-  }
-
-  /**
-   * Updates the field-relative position.
-   */
-  public void updateOdometry() {
-    m_odometry.update(getAngle(), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
-  }
 
   @Override
   public void periodic() {
+    pose  = odometry.update(getHeading(), getLeftEncoderFeet(), getRightEncoderFeet());
     setDefaultCommand(new ArcadeDrive());
   }
 }

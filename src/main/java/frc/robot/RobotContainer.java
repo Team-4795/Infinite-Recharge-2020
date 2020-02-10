@@ -8,25 +8,57 @@
 // test comment
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.controller.RamseteController;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 // import frc.robot.commands.ArcadeDrive;
 // import frc.robot.commands.ArmToPosition;
 import frc.robot.Constants;
+import frc.robot.subsystems.Drivebase;
 public class RobotContainer {
 
   private static final double DEADZONE = 0.15;
 
   public Joystick main;
+  private final Drivebase drive; 
+  private final double maxVel;
+  private final double maxAcc;
+  private final double b;
+  private final double zeta;
   // private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
   // private double value;
   // private POVButton MainDPadDown, MainDPadUp;
 
   public RobotContainer() { 
+    String trajectoryJSON = "PathWeaver/pathweaver.json" ;
+    try {
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+      Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+    } catch (IOException ex) {
+      DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+    }
+    drive = new Drivebase();
     main = new Joystick(Constants.MAIN_CONTROLLER);
+    b = 2.0;
+    zeta = 0.7;
+    maxVel = 3.0;
+    maxAcc = 2.0;
     // ARM_CONTROLLER = new Joystick(Constants.ARM_CONTROLLER);
 
     // YButton = new JoystickButton(MAIN_CONTROLLER, 4);
@@ -53,6 +85,7 @@ public class RobotContainer {
   }
 
   // Drivebase control
+
   public double getMainLeftJoyX() {
     double value = main.getRawAxis(0);
     return Math.abs(value) > DEADZONE ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE)) : 0.0;
@@ -146,6 +179,10 @@ public class RobotContainer {
   // }
 
   public Command getAutonomousCommand() {
-	  return null;
+    TrajectoryConfig config = new TrajectoryConfig(maxVel, maxAcc);
+    config.setKinematics(drive.getKinematics());
+    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(Arrays.asList(new Pose2d(), new Pose2d(1.0, 0, new Rotation2d())),config);
+    RamseteCommand command = new RamseteCommand(trajectory, drive::getPose, new RamseteController(b, zeta), drive.getFeedForward(), drive.getKinematics(), drive::getSpeeds, drive.getLeftPID(), drive.getRightPID(), drive::setOutput, drive);
+    return command;
   }
 }
