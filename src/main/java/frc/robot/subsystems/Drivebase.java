@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
@@ -23,7 +24,7 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -35,8 +36,8 @@ public class Drivebase extends SubsystemBase {
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
   private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kEncoderCountPerMeter = 4096; // TODO: tune
-
+  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
+  private static final int kEncoderCountPerRevolution = 18148;
   private static final double kP = 1; // TODO: tune PID
   private static final double kI = 0;
   private static final double kD = 0;
@@ -128,19 +129,19 @@ public class Drivebase extends SubsystemBase {
     // Robot.initVictor(rightMotorTwo);
     // Robot.initVictor(rightMotorThree);
 
-    rightMotor.setInverted(true);
-    rightMotorFollower.setInverted(true);
-    rightMotorFollower.follow(rightMotor);
-
     leftMotor.setInverted(false);
     leftMotorFollower.setInverted(false);
     leftMotorFollower.follow(leftMotor);
-    
-    // rightMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-    // leftMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
-    // rightMotorOne.setSelectedSensorPosition(0);
-    // leftMotorOne.setSelectedSensorPosition(0);
+    rightMotor.setInverted(true);
+    rightMotorFollower.setInverted(true);
+    rightMotorFollower.follow(rightMotor);
+    
+    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+
+    leftMotor.setSelectedSensorPosition(0);
+    rightMotor.setSelectedSensorPosition(0);
   }
 
   public void setMotors(double left, double right) {
@@ -148,10 +149,10 @@ public class Drivebase extends SubsystemBase {
     rightMotor.set(ControlMode.PercentOutput, right);
   }
 
-  public double getLeftEncoderCount() {
+  public int getLeftEncoderCount() {
     return leftMotor.getSelectedSensorPosition();
   }
-  public double getRightEncoderCount() {
+  public int getRightEncoderCount() {
     return rightMotor.getSelectedSensorPosition();
   }
 

@@ -15,6 +15,7 @@ import frc.robot.Robot;
 public class ArcadeDrive extends CommandBase {
 
   private boolean reversed;
+  // private int temp;
   // private double maxVel;
   // private double pastVel;
   // private double maxAccel;
@@ -50,6 +51,13 @@ public class ArcadeDrive extends CommandBase {
     } else {
       Robot.drivebase.setMotors(forward - turn, forward + turn);
     }
+
+    //   if (Robot.oi.getMainAButtonPressed()) {
+    //     temp = Robot.drivebase.getLeftEncoderCount();
+    //   }
+    //   int relativeOver = 18148 - Robot.drivebase.getLeftEncoderCount() + temp;
+    //   double speed = Math.min(0.2, relativeOver / 18148.0);
+    //   Robot.drivebase.setMotors(speed, speed);
 
     // double vel = Robot.drivebase.getLeftVelocity();
     // maxVel = Math.abs(vel) > Math.abs(maxVel) ? vel : maxVel;

@@ -84,7 +84,7 @@ public class RobotContainer {
 
   // Drivebase throttle, which slows down the robot but makes it turn faster
   public double getMainRightTrigger() {
-    return eliminateDeadzone(main.getRawAxis(3));
+    return main.getRawButton(8) ? 1 : 0; //eliminateDeadzone(main.getRawAxis(3));
   }
 
   // // Climber wheel actuation & outtaking
@@ -92,10 +92,16 @@ public class RobotContainer {
   //   return eliminateDeadzone(main.getRawAxis(2));
   // }
 
+  public boolean getMainAButtonPressed() {
+    return main.getRawButtonPressed(1);
+  }
+  public boolean getMainAButton() {
+    return main.getRawButton(1);
+  }
+
   public boolean getMainBButtonPressed() {
     return main.getRawButtonPressed(2);
   }
-
   public boolean getMainBButton() {
     return main.getRawButton(2);
   }
