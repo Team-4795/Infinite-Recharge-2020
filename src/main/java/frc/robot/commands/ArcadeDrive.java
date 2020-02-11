@@ -42,6 +42,8 @@ public class ArcadeDrive extends CommandBase {
       forward *= -1;
     }
     SmartDashboard.putBoolean("Reversed Drivebase", reversed);
+    SmartDashboard.putNumber("Left Encoder Count", Robot.drivebase.getLeftEncoderCount());
+    SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
 
     if (Robot.oi.getMainBButton()) {
       Robot.drivebase.drive(0.3, 0.2);

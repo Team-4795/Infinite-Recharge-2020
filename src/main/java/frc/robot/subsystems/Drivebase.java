@@ -58,7 +58,7 @@ public class Drivebase extends SubsystemBase {
   //in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
 
   private final TalonSRX leftMotor;
-  private final VictorSPX leftMotorFollower;
+  private final TalonSRX leftMotorFollower;
   // private final VictorSPX leftMotorThree;
   private final TalonSRX rightMotor;
   private final TalonSRX rightMotorFollower;
@@ -98,7 +98,7 @@ public class Drivebase extends SubsystemBase {
     // turnController.setContinuous();
 
     leftMotor = new TalonSRX(Constants.DRIVEBASE_LEFT_MAIN_TALON);
-    leftMotorFollower = new VictorSPX(Constants.DRIVEBASE_LEFT_FOLLOWER_VICTOR);
+    leftMotorFollower = new TalonSRX(Constants.DRIVEBASE_LEFT_FOLLOWER_TALON);
     // leftMotorThree = new VictorSPX(Constants.LEFT_MOTOR_THREE);
     rightMotor = new TalonSRX(Constants.DRIVEBASE_RIGHT_MAIN_TALON);
     rightMotorFollower = new TalonSRX(Constants.DRIVEBASE_RIGHT_FOLLOWER_TALON);
@@ -147,18 +147,17 @@ public class Drivebase extends SubsystemBase {
     leftMotor.set(ControlMode.PercentOutput, left);
     rightMotor.set(ControlMode.PercentOutput, right);
   }
-  // public double getLeftEncoderCount() {
-  //   return leftMotorOne.getSelectedSensorPosition();
-  // }
 
-  // public double getRightEncoderCount() {
-  //   return rightMotorOne.getSelectedSensorPosition();
-  // }
+  public double getLeftEncoderCount() {
+    return leftMotor.getSelectedSensorPosition();
+  }
+  public double getRightEncoderCount() {
+    return rightMotor.getSelectedSensorPosition();
+  }
 
   public double getLeftEncoderMeters() {
     return leftMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
   }
-
   public double getRightEncoderMeters() {
     return rightMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
   }

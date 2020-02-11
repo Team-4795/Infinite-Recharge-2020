@@ -20,7 +20,7 @@ public final class Constants {
   public final static int MAIN_CONTROLLER = 0;
 
   // CAN Motor Controller Mappings
-  public final static int DRIVEBASE_LEFT_FOLLOWER_VICTOR = 2;
+  public final static int DRIVEBASE_LEFT_FOLLOWER_TALON = 2;
   public final static int DRIVEBASE_LEFT_MAIN_TALON = 3;
   public final static int DRIVEBASE_RIGHT_FOLLOWER_TALON = 4;
   public final static int DRIVEBASE_RIGHT_MAIN_TALON = 5;

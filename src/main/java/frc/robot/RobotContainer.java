@@ -8,14 +8,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-
-// import frc.robot.commands.ArcadeDrive;
-// import frc.robot.commands.ArmToPosition;
-import frc.robot.Constants;
 
 public class RobotContainer {
 
@@ -56,6 +50,16 @@ public class RobotContainer {
     //drivetrainOverride.whileActive(new ArcadeDrive());
 
     //AButton.whenPressed(new TurnToLine(5));
+  }
+
+  // Drivebase control (Y: magnitude)
+  public Vector2d getMainLeftJoy() {
+    return new Vector2d(eliminateDeadzone(main.getRawAxis(0)), eliminateDeadzone(main.getRawAxis(1)));
+  }
+
+  // Drivebase control (X: magnitude)
+  public Vector2d getMainRightJoy() {
+    return new Vector2d(eliminateDeadzone(main.getRawAxis(3)), eliminateDeadzone(main.getRawAxis(2)));
   }
 
   // Controller joysticks
