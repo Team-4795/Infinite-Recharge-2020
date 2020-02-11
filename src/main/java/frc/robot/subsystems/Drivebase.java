@@ -37,7 +37,7 @@ import frc.robot.commands.ArcadeDrive;
 
 public class Drivebase extends SubsystemBase {
   public final TalonSRX leftMotor;
-  private final VictorSPX leftMotorFollower;
+  private final TalonSRX leftMotorFollower;
   // private final VictorSPX leftMotorThree;
   public final TalonSRX rightMotor;
   private final TalonSRX rightMotorFollower;
@@ -92,7 +92,7 @@ public class Drivebase extends SubsystemBase {
     // turnController.setContinuous();
 
     leftMotor = new TalonSRX(Constants.DRIVEBASE_LEFT_MAIN_TALON);
-    leftMotorFollower = new VictorSPX(Constants.DRIVEBASE_LEFT_FOLLOWER_VICTOR);
+    leftMotorFollower = new TalonSRX(Constants.DRIVEBASE_LEFT_FOLLOWER_VICTOR);
     // leftMotorThree = new VictorSPX(Constants.LEFT_MOTOR_THREE);
     rightMotor = new TalonSRX(Constants.DRIVEBASE_RIGHT_MAIN_TALON);
     rightMotorFollower = new TalonSRX(Constants.DRIVEBASE_RIGHT_FOLLOWER_TALON);
