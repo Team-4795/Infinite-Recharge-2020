@@ -36,7 +36,7 @@ import frc.robot.commands.ManualArmControl;
 public class Arm extends SubsystemBase {
 
     private final CANSparkMax ArmMotor;
-
+    private final TalonSRX armSpinner;
     // soft limit for arm in encoder ticks
     private final double lowerLimit = -77.69;
 
@@ -65,9 +65,11 @@ public class Arm extends SubsystemBase {
     public Arm() {
 
         ArmMotor = new CANSparkMax(Constants.ARM_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
-
+        armBalancer = new PIDController(P, I, D);
+        armController = new CANPIDController(ArmMotor);
         armEnc = new CANEncoder(ArmMotor);
         topLimit = new CANDigitalInput(ArmMotor, LimitSwitch.kReverse, LimitSwitchPolarity.kNormallyOpen);
+        armSpinner = new TalonSRX(Constants.ARM_SPINNER);
 
         ArmMotor.setIdleMode(IdleMode.kBrake);
         ArmMotor.setOpenLoopRampRate(0.5);
@@ -75,10 +77,10 @@ public class Arm extends SubsystemBase {
         // ArmMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
         // ArmMotor.setParameter(ConstantParameter.kCanID, RobotContainer.ARM_MOTOR.value);
         // ArmMotor.setInverted(true);
-
+      
+    
   }
   
-  }
 
   public double getPos() {
     return armEnc.getPosition();
@@ -112,7 +114,7 @@ public class Arm extends SubsystemBase {
     
 
   @Override
-  public void initDefaultCommand() {
+  public void periodic() {
     setDefaultCommand(new ManualArmControl());
   }
 }

@@ -43,5 +43,6 @@ public class ManualArmControl extends CommandBase {
 
   @Override
   protected void interrupted() {
+    
   }
 }
