@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
@@ -23,7 +24,7 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -35,8 +36,8 @@ public class Drivebase extends SubsystemBase {
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
   private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kEncoderCountPerMeter = 4096; // TODO: tune
-
+  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
+  private static final int kEncoderCountPerRevolution = 18148;
   private static final double kP = 1; // TODO: tune PID
   private static final double kI = 0;
   private static final double kD = 0;
@@ -58,7 +59,7 @@ public class Drivebase extends SubsystemBase {
   //in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
 
   private final TalonSRX leftMotor;
-  private final VictorSPX leftMotorFollower;
+  private final TalonSRX leftMotorFollower;
   // private final VictorSPX leftMotorThree;
   private final TalonSRX rightMotor;
   private final TalonSRX rightMotorFollower;
@@ -98,7 +99,7 @@ public class Drivebase extends SubsystemBase {
     // turnController.setContinuous();
 
     leftMotor = new TalonSRX(Constants.DRIVEBASE_LEFT_MAIN_TALON);
-    leftMotorFollower = new VictorSPX(Constants.DRIVEBASE_LEFT_FOLLOWER_VICTOR);
+    leftMotorFollower = new TalonSRX(Constants.DRIVEBASE_LEFT_FOLLOWER_TALON);
     // leftMotorThree = new VictorSPX(Constants.LEFT_MOTOR_THREE);
     rightMotor = new TalonSRX(Constants.DRIVEBASE_RIGHT_MAIN_TALON);
     rightMotorFollower = new TalonSRX(Constants.DRIVEBASE_RIGHT_FOLLOWER_TALON);
@@ -128,37 +129,36 @@ public class Drivebase extends SubsystemBase {
     // Robot.initVictor(rightMotorTwo);
     // Robot.initVictor(rightMotorThree);
 
-    rightMotor.setInverted(true);
-    rightMotorFollower.setInverted(true);
-    rightMotorFollower.follow(rightMotor);
-
     leftMotor.setInverted(false);
     leftMotorFollower.setInverted(false);
     leftMotorFollower.follow(leftMotor);
-    
-    // rightMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-    // leftMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
-    // rightMotorOne.setSelectedSensorPosition(0);
-    // leftMotorOne.setSelectedSensorPosition(0);
+    rightMotor.setInverted(true);
+    rightMotorFollower.setInverted(true);
+    rightMotorFollower.follow(rightMotor);
+    
+    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+
+    leftMotor.setSelectedSensorPosition(0);
+    rightMotor.setSelectedSensorPosition(0);
   }
 
   public void setMotors(double left, double right) {
     leftMotor.set(ControlMode.PercentOutput, left);
     rightMotor.set(ControlMode.PercentOutput, right);
   }
-  // public double getLeftEncoderCount() {
-  //   return leftMotorOne.getSelectedSensorPosition();
-  // }
 
-  // public double getRightEncoderCount() {
-  //   return rightMotorOne.getSelectedSensorPosition();
-  // }
+  public int getLeftEncoderCount() {
+    return leftMotor.getSelectedSensorPosition();
+  }
+  public int getRightEncoderCount() {
+    return rightMotor.getSelectedSensorPosition();
+  }
 
   public double getLeftEncoderMeters() {
     return leftMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
   }
-
   public double getRightEncoderMeters() {
     return rightMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
   }
