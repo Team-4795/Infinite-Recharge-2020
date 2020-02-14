@@ -1,4 +1,4 @@
-GRADLEW=JAVA_HOME='/home/eastbots/wpilib/2020/jdk' ./gradlew
+GRADLEW="JAVA_HOME='/home/eastbots/wpilib/2020/jdk' ./gradlew"
 
 help:
 	@echo 'make build  - check and compile the source code'
