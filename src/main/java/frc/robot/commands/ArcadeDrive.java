@@ -9,6 +9,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.Robot;
 
@@ -31,14 +32,13 @@ public class ArcadeDrive extends CommandBase {
 
   @Override
   public void execute() {
-    double throttle = 0.85 - 0.65 * Robot.oi.getMainRightTrigger();
-    double forward = Robot.oi.getMainLeftJoyY() * throttle;
-    double turn = Robot.oi.getMainRightJoyX()
-      * (forward == 0 ? 0.6 : 0.35)
-      * (1 + 0.3 * Robot.oi.getMainRightTrigger())
-      * throttle;
+    double throttle = Robot.oi.main.rightTrigger();
+    double forward = Robot.oi.main.leftJoystick().y * (0.85 - 0.65 * throttle);
+    double turn = Robot.oi.main.rightJoystick().x
+      * (1 + 0.3 * throttle) * (0.85 - 0.65 * throttle) // maybe replace this with 0.85 - 0.55 * throttle instead of a quadratic 
+      * (forward == 0 ? 0.6 : 0.35);
 
-    if (Robot.oi.getMainRightBumperPressed()) reversed = !reversed;
+    if (Robot.oi.main.rightBumberPressed()) reversed = !reversed;
     if (reversed) {
       forward *= -1;
     }
@@ -46,12 +46,15 @@ public class ArcadeDrive extends CommandBase {
     SmartDashboard.putNumber("Left Encoder Count", Robot.drivebase.getLeftEncoderCount());
     SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
 
-    if (Robot.oi.getMainBButton()) {
+    if (Robot.oi.main.getB()) {
       Robot.drivebase.drive(0.3, 0.2);
     } else {
       Robot.drivebase.setMotors(forward - turn, forward + turn);
     }
 
+    if (Robot.oi.main.backButtonPressed()) {
+      System.exit(0);
+    }
     //   if (Robot.oi.getMainAButtonPressed()) {
     //     temp = Robot.drivebase.getLeftEncoderCount();
     //   }
