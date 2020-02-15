@@ -16,10 +16,7 @@ public class ManualArmControl extends CommandBase {
   private double throttle;
 
   public ManualArmControl() {
-    requires(Robot.Arm);
-  }
-
-  private void requires(Object arm) {
+    addRequirements(Robot.arm);
   }
 
   @Override
@@ -29,7 +26,7 @@ public class ManualArmControl extends CommandBase {
   @Override
   public void execute() {
     throttle = (0.55 - (0.3 * Robot.oi.getArmRightTrigger()));
-    ((Arm) Robot.Arm).actuate(Robot.oi.getArmLeftJoyY() * throttle);
+    (Robot.arm).actuate(Robot.oi.getArmLeftJoyY() * throttle);
   }
   
   @Override
@@ -38,11 +35,6 @@ public class ManualArmControl extends CommandBase {
   }
 
   @Override
-  protected void end() {
-  }
+  public void end(boolean interrupted) {
 
-  @Override
-  protected void interrupted() {
-    
-  }
 }

@@ -26,8 +26,5 @@ public final class Constants {
   public final static int DRIVEBASE_RIGHT_MAIN_TALON = 5;
   public final static int ARM_MOTOR = 7;
   public final static int ARM_SPINNER = 8;
-  // public final static int INTAKE_MOTOR = 11;
-  // public final static int CLIMBER_WHEELS = 12;
-  // public final static int HATCH_MOTOR = 8;
-  // public final static int CLIMBER_MOTOR = 20;
+  public final static int ARM_INTAKE = 9;
 }

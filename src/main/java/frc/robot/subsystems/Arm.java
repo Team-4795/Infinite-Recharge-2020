@@ -18,6 +18,7 @@ import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANDigitalInput.LimitSwitch;
 import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
+import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -32,11 +33,13 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ManualArmControl;
+import java.time.Duration;;
 
 public class Arm extends SubsystemBase {
 
     private final CANSparkMax ArmMotor;
-    private final TalonSRX armSpinner;
+
+    private final TalonSRX intake;
     // soft limit for arm in encoder ticks
     private final double lowerLimit = -77.69;
 
@@ -60,6 +63,10 @@ public class Arm extends SubsystemBase {
     private final PIDController armBalancer;
     private final CANEncoder armEnc;
     private final CANDigitalInput topLimit;
+
+    private double up;
+    private double down;
+
     private boolean gucci;
 
     public Arm() {
@@ -69,7 +76,7 @@ public class Arm extends SubsystemBase {
         armController = new CANPIDController(ArmMotor);
         armEnc = new CANEncoder(ArmMotor);
         topLimit = new CANDigitalInput(ArmMotor, LimitSwitch.kReverse, LimitSwitchPolarity.kNormallyOpen);
-        armSpinner = new TalonSRX(Constants.ARM_SPINNER);
+        intake = new TalonSRX(Constants.ARM_INTAKE);
 
         ArmMotor.setIdleMode(IdleMode.kBrake);
         ArmMotor.setOpenLoopRampRate(0.5);
@@ -77,13 +84,29 @@ public class Arm extends SubsystemBase {
         // ArmMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
         // ArmMotor.setParameter(ConstantParameter.kCanID, RobotContainer.ARM_MOTOR.value);
         // ArmMotor.setInverted(true);
+        armController.setP(P, 0);
+        armController.setI(I, 0);
+        armController.setIZone(20, 0);
+        armController.setD(D, 0);
+        armController.setFF(F, 0);
+        armController.setOutputRange(-0.55, 0.55, 0);
+        armController.setSmartMotionMaxVelocity(4200, 0);
+        armController.setSmartMotionMaxAccel(2750, 0); 
+        armController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+        armController.setSmartMotionAllowedClosedLoopError(1.0, 0); 
       
     
   }
   
-
+  public void setIntake(double speed) {
+    intake.set(ControlMode.PercentOutput, speed);
+  }
   public double getPos() {
     return armEnc.getPosition();
+  }
+
+  public double getVel() {
+    return armEnc.getVelocity();
   }
 
   public Boolean getTopLimit() {
@@ -94,16 +117,18 @@ public class Arm extends SubsystemBase {
     armEnc.setPosition(0.0);
   }
 
-  public void actuate(final double output) {
+  // public void actuate(final double output) {
         
-    }
+  //   }
 
-  public void intake(double upPos) {
-    armController.setReference(upPos, ControlType.kSmartMotion);
+  public void intake() {
+    double downPos = this.down;
+    armController.setReference(downPos, ControlType.kSmartMotion);
   }
 
   public void outtake(double downPos) {
-    armController.setReference(downPos, ControlType.kSmartMotion);
+    double upPos = this.up;
+    armController.setReference(upPos, ControlType.kSmartMotion);
   }
 
     /*

@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
 
 /**
@@ -34,9 +34,7 @@ public class Robot extends TimedRobot {
   public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
 
-public static Object Arm;
-
-public static Object ahrs;
+public static Arm arm;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -50,6 +48,7 @@ public static Object ahrs;
     pdp = new PowerDistributionPanel();
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
+    arm = new Arm();
   }
 
   /**
