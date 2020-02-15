@@ -97,9 +97,12 @@ public class Arm extends SubsystemBase {
       
     
   }
-  
+  public void setArm(double speed) {
+    ArmMotor.set(speed);
+  }
   public void setIntake(double speed) {
     intake.set(ControlMode.PercentOutput, speed);
+  
   }
   public double getPos() {
     return armEnc.getPosition();
@@ -126,9 +129,30 @@ public class Arm extends SubsystemBase {
     armController.setReference(downPos, ControlType.kSmartMotion);
   }
 
-  public void outtake(double downPos) {
+  public void outtake() {
     double upPos = this.up;
     armController.setReference(upPos, ControlType.kSmartMotion);
+  }
+
+  public void setMotorWithTicks(boolean isNeg) {
+    double  mult = 1.0;
+    if (isNeg) {
+      mult *= -1.0;
+    }
+    int ticks = 0;
+    while (ticks < 100) {
+      this.setIntake(0.5*mult);
+      ticks += 1;
+    }
+    mult = 1.0;
+  }
+
+  public void ballPickUp() {
+    this.intake();
+    this.setMotorWithTicks(true);
+    this.outtake();
+    this.setMotorWithTicks(false);
+    
   }
 
     /*
