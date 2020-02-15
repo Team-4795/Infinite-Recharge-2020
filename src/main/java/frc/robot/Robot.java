@@ -30,8 +30,8 @@ import frc.robot.subsystems.Drivebase;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  public static RobotContainer oi;
-  public static Drivebase drivebase;
+  public static RobotContainer rc;
+  // public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
 
   /**
@@ -42,10 +42,10 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    oi = new RobotContainer();
+    rc = new RobotContainer();
     pdp = new PowerDistributionPanel();
     // ahrs = new AHRS(SPI.Port.kMXP);
-    drivebase = new Drivebase();
+    // drivebase = new Drivebase();
   }
 
   /**
@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = oi.getAutonomousCommand();
+    m_autonomousCommand = rc.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {

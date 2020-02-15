@@ -17,12 +17,15 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.controller.RamseteController;
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -30,22 +33,25 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 // import frc.robot.commands.ArcadeDrive;
 // import frc.robot.commands.ArmToPosition;
 import frc.robot.Constants;
+import frc.robot.commands.ArcadeDrive;
 import frc.robot.subsystems.Drivebase;
-public class RobotContainer {
 
+public class RobotContainer {
+  public Drivebase drive;
   private static final double DEADZONE = 0.15;
 
+  private final double kS = 0.993;
+  private final double kV = 0.00239; 
+  private final double kA = 0.000212; 
+
   public Joystick main;
-  private final Drivebase drive; 
-  private final double maxVel;
-  private final double maxAcc;
-  private final double b;
-  private final double zeta;
   // private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
   // private double value;
   // private POVButton MainDPadDown, MainDPadUp;
 
   public RobotContainer() { 
+    drive = new Drivebase();
+    drive.setDefaultCommand(new ArcadeDrive(drive));
     String trajectoryJSON = "PathWeaver/pathweaver.json" ;
     // try {
     //   Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
@@ -53,12 +59,7 @@ public class RobotContainer {
     // } catch (IOException ex) {
     //   DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
     // }
-    drive = new Drivebase();
     main = new Joystick(Constants.MAIN_CONTROLLER);
-    b = 2.0;
-    zeta = 0.7;
-    maxVel = 3.0;
-    maxAcc = 2.0;
     // ARM_CONTROLLER = new Joystick(Constants.ARM_CONTROLLER);
 
     // YButton = new JoystickButton(MAIN_CONTROLLER, 4);
@@ -179,10 +180,30 @@ public class RobotContainer {
   // }
 
   public Command getAutonomousCommand() {
-    TrajectoryConfig config = new TrajectoryConfig(maxVel, maxAcc);
-    config.setKinematics(drive.getKinematics());
-    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(Arrays.asList(new Pose2d(), new Pose2d(1.0, 0, new Rotation2d())),config);
-    RamseteCommand command = new RamseteCommand(trajectory, drive::getPose, new RamseteController(b, zeta), drive.getFeedForward(), drive.getKinematics(), drive::getSpeeds, drive.getLeftPID(), drive.getRightPID(), drive::setOutput, drive);
+    var autoVoltageConstraint =
+        new DifferentialDriveVoltageConstraint(
+            new SimpleMotorFeedforward(kS, kV, kA), drive.getKinematics(), 12
+        );
+
+    TrajectoryConfig config = new TrajectoryConfig(Units.feetToMeters(2), Units.feetToMeters(2));
+    config.setKinematics(drive.getKinematics()).addConstraint(autoVoltageConstraint);
+    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+      Arrays.asList(
+          new Pose2d(0.0, 0.0, new Rotation2d(0.0)),
+          new Pose2d(2.0, 2.0, new Rotation2d(0.0))),
+          config);
+    RamseteCommand command = new RamseteCommand(trajectory, 
+                  drive::getPose, 
+                  new RamseteController(2.0, 0.7), 
+                  drive.getFeedForward(), 
+                  drive.getKinematics(), 
+                  drive::getSpeeds, 
+                  drive.getLeftPID(), 
+                  drive.getRightPID(), 
+                  drive::setOutput, 
+                  drive);
+
+    
     return command;
   }
 }

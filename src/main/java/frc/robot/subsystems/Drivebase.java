@@ -9,6 +9,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
@@ -16,9 +17,7 @@ import com.kauailabs.navx.frc.AHRS.BoardAxis;
 import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -38,25 +37,22 @@ import frc.robot.commands.ArcadeDrive;
 public class Drivebase extends SubsystemBase {
   public final TalonSRX leftMotor;
   private final TalonSRX leftMotorFollower;
-  // private final VictorSPX leftMotorThree;
   public final TalonSRX rightMotor;
   private final TalonSRX rightMotorFollower;
   public DifferentialDriveKinematics kinematics; 
-  public final double driveWidth; 
   public DifferentialDriveOdometry odometry;
   public AHRS gyro;
-  public Pose2d pose; 
-  public double ks;
-  public double kv; 
+  private Pose2d pose; 
+
+  private final double kS = 0.993;
+  private final double kV = 0.00239; 
+  private final double kA = 0.000212; 
   public SimpleMotorFeedforward feedforward;
   public PIDController pidRight;
   public PIDController pidLeft;
-  public final double rP = 0.0;
-  public final double rI = 0.0;
-  public final double rD = 0.0;
-  public final double lP = 0.0; 
-  public final double lI = 0.0;
-  public final double lD = 0.0;
+  private final double kP = 0.000808;
+  private final double kI = 0.0;
+  private final double kD = 0.0;
   // private final VictorSPX rightMotorThree;
   // public final PIDController turnController;
 
@@ -77,13 +73,12 @@ public class Drivebase extends SubsystemBase {
   // in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
   public Drivebase() {
-    driveWidth = 0.0;
-    kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(driveWidth));
-    odometry = new DifferentialDriveOdometry(getHeading());
     gyro = new AHRS(SPI.Port.kMXP);
-    feedforward = new SimpleMotorFeedforward(ks, kv); 
-    pidRight = new PIDController(rP, rI, rD);
-    pidLeft = new PIDController(lP, lI, lD);
+    kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(20));
+    odometry = new DifferentialDriveOdometry(getHeading());
+    feedforward = new SimpleMotorFeedforward(kS, kV, kA); 
+    pidRight = new PIDController(kP, kI, kD);
+    pidLeft = new PIDController(kP, kI, kD);
 
     // turnController = new PIDController(P, I, D, Robot.ahrs, this);
     // turnController.setInputRange(-180.0f, 180.0f);
@@ -132,15 +127,12 @@ public class Drivebase extends SubsystemBase {
     rightMotorFollower.follow(rightMotor);
     // rightMotorThree.follow(rightMotorOne);
     
-    // rightMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-    // leftMotorOne.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
-    // rightMotorOne.setSelectedSensorPosition(0);
-    // leftMotorOne.setSelectedSensorPosition(0);
+    rightMotor.setSelectedSensorPosition(0);
+    leftMotor.setSelectedSensorPosition(0);
   }
-
-  
-
 
   public Rotation2d getHeading() {
     return Rotation2d.fromDegrees(-gyro.getAngle());
@@ -169,7 +161,6 @@ public class Drivebase extends SubsystemBase {
     return feedforward;
   }
 
-
   // public double getLeftEncoderCount() {
   //   return leftMotorOne.getSelectedSensorPosition();
   // }
@@ -196,8 +187,8 @@ public class Drivebase extends SubsystemBase {
   }
 
   public void setOutput(double leftVoltage, double rightVoltage) {
-    leftMotor.set(null, leftVoltage/12);
-    rightMotor.set(null, rightVoltage/12);
+    leftMotor.set(ControlMode.PercentOutput, leftVoltage/2);
+    rightMotor.set(ControlMode.PercentOutput, rightVoltage/2);
 
   }
 
@@ -227,17 +218,15 @@ public class Drivebase extends SubsystemBase {
   // }
 
   public DifferentialDriveWheelSpeeds getSpeeds() {
-   return new DifferentialDriveWheelSpeeds(
-        getLeftVelocity() / 7.29 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60,
-    getRightVelocity() / 7.29* 2 * Math.PI * Units.inchesToMeters(3.0)
-    / 60);
+    return new DifferentialDriveWheelSpeeds(
+      getLeftVelocity() / 7.29 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60,
+      getRightVelocity() / 7.29 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60);
   }
   
 
 
   @Override
   public void periodic() {
-    pose  = odometry.update(getHeading(), getLeftEncoderFeet(), getRightEncoderFeet());
-    setDefaultCommand(new ArcadeDrive());
+    pose = odometry.update(getHeading(), getLeftEncoderFeet(), getRightEncoderFeet());
   }
 }
