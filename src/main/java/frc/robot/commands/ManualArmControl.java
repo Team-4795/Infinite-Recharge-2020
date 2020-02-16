@@ -38,3 +38,4 @@ public class ManualArmControl extends CommandBase {
   public void end(boolean interrupted) {
 
 }
+}
