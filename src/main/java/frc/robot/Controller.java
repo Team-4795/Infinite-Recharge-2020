@@ -20,7 +20,7 @@ public class Controller {
       ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE))
       : 0.0;
   }
-
+  
   private int type;
   private Joystick raw;
 
@@ -75,13 +75,13 @@ public class Controller {
   public boolean leftBumper() {
     return raw.getRawButton(5);
   }
-  public boolean leftBumberPressed() {
+  public boolean leftBumperPressed() {
     return raw.getRawButtonPressed(5);
   }
   public boolean rightBumper() {
     return raw.getRawButton(6);
   }
-  public boolean rightBumberPressed() {
+  public boolean rightBumperPressed() {
     return raw.getRawButtonPressed(6);
   }
   public boolean backButton() {

@@ -33,83 +33,68 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ManualArmControl;
-import java.time.Duration;;
+import java.time.Duration;
 
 public class Arm extends SubsystemBase {
 
-    private final CANSparkMax ArmMotor;
+  private final CANSparkMax armMotor;
 
-    private final TalonSRX intake;
-    // soft limit for arm in encoder ticks
-    private final double lowerLimit = -77.69;
+  private final TalonSRX intake;
+  // soft limit for arm in encoder ticks
+  private final static double kLowerLimit = -77.69;
 
-    private final CANPIDController armController;
+  private final CANPIDController armController;
 
-    // PIDF values for balancing when climbing
-    private static double Pb = 0.0225;
-    private static double Ib = 0.0;
-    private static double Db = 0.00;
+  // PID values for moving arm to position
+  // private final static double P = 0.00055;
+  private final static double kP = 0.00015;
+  private final static double kI = 0.000001;
+  private final static double kD = 0.0000000;
+  private final static double kF = 0.0002;
+  private final static double kTolerance = 5.0;
 
-    // PID values for moving arm to position
-    // private static double P = 0.00055;
-    private static double P = 0.00015;
-    private static double I = 0.000001;
-    private static double D = 0.0000000;
-    private static double F = 0.0002;
+  private final CANEncoder armEncoder;
+  private final CANDigitalInput topLimit;
 
-    private static double middle; 
+  private double up;
+  private double down;
 
-    private final static double Tolerance = 5.0f;
-    private final PIDController armBalancer;
-    private final CANEncoder armEnc;
-    private final CANDigitalInput topLimit;
+  public Arm() {
+    armMotor = new CANSparkMax(Constants.ARM_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
+    armController = new CANPIDController(armMotor);
+    armEncoder = new CANEncoder(armMotor);
+    topLimit = new CANDigitalInput(armMotor, LimitSwitch.kReverse, LimitSwitchPolarity.kNormallyOpen);
+    intake = new TalonSRX(Constants.ARM_INTAKE);
 
-    private double up;
-    private double down;
-
-    private boolean gucci;
-
-    public Arm() {
-
-        ArmMotor = new CANSparkMax(Constants.ARM_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
-        armBalancer = new PIDController(P, I, D);
-        armController = new CANPIDController(ArmMotor);
-        armEnc = new CANEncoder(ArmMotor);
-        topLimit = new CANDigitalInput(ArmMotor, LimitSwitch.kReverse, LimitSwitchPolarity.kNormallyOpen);
-        intake = new TalonSRX(Constants.ARM_INTAKE);
-
-        ArmMotor.setIdleMode(IdleMode.kBrake);
-        ArmMotor.setOpenLoopRampRate(0.5);
-        ArmMotor.setClosedLoopRampRate(0.5);
-        // ArmMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
-        // ArmMotor.setParameter(ConstantParameter.kCanID, RobotContainer.ARM_MOTOR.value);
-        // ArmMotor.setInverted(true);
-        armController.setP(P, 0);
-        armController.setI(I, 0);
-        armController.setIZone(20, 0);
-        armController.setD(D, 0);
-        armController.setFF(F, 0);
-        armController.setOutputRange(-0.55, 0.55, 0);
-        armController.setSmartMotionMaxVelocity(4200, 0);
-        armController.setSmartMotionMaxAccel(2750, 0); 
-        armController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
-        armController.setSmartMotionAllowedClosedLoopError(1.0, 0); 
-      
-    
+    armMotor.setIdleMode(IdleMode.kBrake);
+    armMotor.setOpenLoopRampRate(0.5);
+    armMotor.setClosedLoopRampRate(0.5);
+    // ArmMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
+    // ArmMotor.setParameter(ConstantParameter.kCanID, RobotContainer.ARM_MOTOR.value);
+    // ArmMotor.setInverted(true);
+    armController.setP(kP, 0);
+    armController.setI(kI, 0);
+    armController.setIZone(20, 0);
+    armController.setD(kD, 0);
+    armController.setFF(kF, 0);
+    armController.setOutputRange(-0.55, 0.55, 0);
+    armController.setSmartMotionMaxVelocity(4200, 0);
+    armController.setSmartMotionMaxAccel(2750, 0); 
+    armController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+    armController.setSmartMotionAllowedClosedLoopError(1.0, 0); 
   }
+
   public void setArm(double speed) {
-    ArmMotor.set(speed);
+    armMotor.set(speed);
   }
   public void setIntake(double speed) {
     intake.set(ControlMode.PercentOutput, speed);
-  
   }
   public double getPos() {
-    return armEnc.getPosition();
+    return armEncoder.getPosition();
   }
-
   public double getVel() {
-    return armEnc.getVelocity();
+    return armEncoder.getVelocity();
   }
 
   public Boolean getTopLimit() {
@@ -117,33 +102,28 @@ public class Arm extends SubsystemBase {
   }
 
   public void resetEnc() {
-    armEnc.setPosition(0.0);
+    armEncoder.setPosition(0.0);
   }
 
   // public void actuate(final double output) {
         
-  //   }
+  // }
 
   public void intake() {
-    double downPos = this.down;
-    armController.setReference(downPos, ControlType.kSmartMotion);
+    armController.setReference(down, ControlType.kSmartMotion);
   }
-
   public void outtake() {
-    double upPos = this.up;
-    armController.setReference(upPos, ControlType.kSmartMotion);
+    armController.setReference(up, ControlType.kSmartMotion);
   }
 
   public void setMotorWithTicks(boolean isNeg) {
-    double  mult = 1.0;
-    if (isNeg) {
-      mult *= -1.0;
-    }
-    int ticks = 0;
-    while (ticks < 100) {
-      this.setIntake(0.5*mult);
-      ticks += 1;
-    }
+    double mult = isNeg ? -1.0 : 1.0;
+    // int ticks = 0;
+    // while (ticks < 100) {
+    //   this.setIntake(0.5 * mult);
+    //   ticks += 1;
+    // }
+    this.setIntake(0.5 * mult); // FIXME: ticks
     mult = 1.0;
   }
 
@@ -152,15 +132,11 @@ public class Arm extends SubsystemBase {
     this.setMotorWithTicks(true);
     this.outtake();
     this.setMotorWithTicks(false);
-    
   }
 
-    /*
-     * public void setPosition(double position) {
-     * armController.setReference(position, ControlType.kPosition); }
-     */
-
-    
+  public void setPosition(double position) {
+    armController.setReference(position, ControlType.kPosition);
+  }
 
   @Override
   public void periodic() {

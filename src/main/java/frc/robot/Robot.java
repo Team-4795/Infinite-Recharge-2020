@@ -91,8 +91,8 @@ public AutoArm armCommand;
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-   armCommand = new AutoArm();
-   armCommand.schedule();
+    armCommand = new AutoArm();
+    armCommand.schedule();
   }
 
   /**
