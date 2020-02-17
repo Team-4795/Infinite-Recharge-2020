@@ -144,4 +144,12 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
 	  return null;
   }
+
+public double getArmLeftJoyY() {
+	return 0;
+}
+
+public double getArmRightTrigger() {
+	return 0;
+}
 }
