@@ -7,34 +7,16 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-
-// import frc.robot.commands.ArcadeDrive;
-// import frc.robot.commands.ArmToPosition;
-import frc.robot.Constants;
 
 public class RobotContainer {
-
-  private static final double DEADZONE = 0.125;
-  private static double eliminateDeadzone(double value) {
-    return Math.abs(value) > DEADZONE
-      ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE))
-      : 0.0;
-  }
-
-  public Joystick main;
   // private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
   // private double value;
   // private POVButton MainDPadDown, MainDPadUp;
-  
+  public Controller main;
   public RobotContainer() { 
-    main = new Joystick(Constants.MAIN_CONTROLLER);
+    main = new Controller(Constants.MAIN_CONTROLLER);
     // arm = new Joystick(Constants.ARM_CONTROLLER);
-
     // YButton = new JoystickButton(main, 4);
     // AButton = new JoystickButton(main, 1);
     // XButton = new JoystickButton(main, 3);
@@ -58,47 +40,63 @@ public class RobotContainer {
     //AButton.whenPressed(new TurnToLine(5));
   }
 
+  // Drivebase control (Y: magnitude)
+  // public Vector2d getMainLeftJoy() {
+  //   return main.leftJoystick();
+  // }
+
+  // Drivebase control (X: magnitude)
+  // public Vector2d getMainRightJoy() {
+  //   return main.rightJoystick();
+  // }
+
   // Controller joysticks
-  public double getMainLeftJoyX() {
-    return eliminateDeadzone(main.getRawAxis(0));
-  }
+  // public double getMainLeftJoyX() {
+  //   return removeDeadzone(main.getRawAxis(0));
+  // }
   
   // Drivebase control (magnitude)
-  public double getMainLeftJoyY() {
-    return eliminateDeadzone(main.getRawAxis(1));
-  }
+  // public double getMainLeftJoyY() {
+  //   return removeDeadzone(main.getRawAxis(1));
+  // }
   
   // Drivebase control (direction)
-  public double getMainRightJoyX() {
-    return eliminateDeadzone(main.getRawAxis(3));
-  }
+  // public double getMainRightJoyX() {
+  //   return removeDeadzone(main.getRawAxis(3));
+  // }
 
   // (unused)
-  public double getMainRightJoyY() {
-    return eliminateDeadzone(main.getRawAxis(2));
-  }
+  // public double getMainRightJoyY() {
+  //   return removeDeadzone(main.getRawAxis(2));
+  // }
 
   // Drivebase throttle, which slows down the robot but makes it turn faster
-  public double getMainRightTrigger() {
-    return eliminateDeadzone(main.getRawAxis(3));
-  }
+  // public double getMainRightTrigger() {
+  //   return main.getRawButton(8) ? 1 : 0; //removeDeadzone(main.getRawAxis(3));
+  // }
 
   // // Climber wheel actuation & outtaking
   // public double getMainLeftTrigger() {
-  //   return eliminateDeadzone(main.getRawAxis(2));
+  //   return removeDeadzone(main.getRawAxis(2));
   // }
 
-  public boolean getMainBButtonPressed() {
-    return main.getRawButtonPressed(2);
-  }
+  // public boolean getMainAButtonPressed() {
+  //   return main.getRawButtonPressed(1);
+  // }
+  // public boolean getMainAButton() {
+  //   return main.getRawButton(1);
+  // }
 
-  public boolean getMainBButton() {
-    return main.getRawButton(2);
-  }
+  // public boolean getMainBButtonPressed() {
+  //   return main.getRawButtonPressed(2);
+  // }
+  // public boolean getMainBButton() {
+  //   return main.getRawButton(2);
+  // }
 
-  public boolean getMainLeftBumperPressed() {
-    return main.getRawButtonPressed(5);
-  }
+  // public boolean getMainLeftBumperPressed() {
+  //   return main.getRawButtonPressed(5);
+  // }
 
   // public boolean getArmLeftBumper() {
   //   return arm.getRawButton(5);
@@ -108,10 +106,10 @@ public class RobotContainer {
   //   return arm.getRawButton(6);
   // }
 
-  // Toggles which way is "forward" for drivebase
-  public boolean getMainRightBumperPressed() {
-    return main.getRawButtonPressed(6);
-  }
+  // // Toggles which way is "forward" for drivebase
+  // public boolean getMainRightBumperPressed() {
+  //   return main.getRawButtonPressed(6);
+  // }
 
   // public boolean getArmXButton() {
   //   return arm.getRawButton(3);
@@ -125,22 +123,22 @@ public class RobotContainer {
   //   return arm.getRawButton(4);
   // }
 
-  public boolean getMainYButtonPressed() {
-    return main.getRawButtonPressed(4);
-  }
+  // public boolean getMainYButtonPressed() {
+  //   return main.getRawButtonPressed(4);
+  // }
 
   // // Arm control
   // public double getArmLeftJoyY() {
-  //   return eliminateDeadzone(arm.getRawAxis(1));
+  //   return removeDeadzone(arm.getRawAxis(1));
   // }
 
   // // Arm throttle
   // public double getArmRightTrigger() {
-  //   return eliminateDeadzone(arm.getRawAxis(3));
+  //   return removeDeadzone(arm.getRawAxis(3));
   // }
 
   // public double getArmLeftTrigger() {
-  //   return eliminateDeadzone(arm.getRawAxis(2));
+  //   return removeDeadzone(arm.getRawAxis(2));
   // }
 
   public Command getAutonomousCommand() {

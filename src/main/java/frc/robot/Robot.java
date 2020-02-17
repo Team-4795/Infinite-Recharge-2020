@@ -144,6 +144,11 @@ public AutoArm armCommand;
     motor.enableCurrentLimit(true);
     motor.configOpenloopRamp(0.2, 0);
     motor.configClosedloopRamp(0.2, 0);
+
+    motor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+    motor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+    motor.configNominalOutputForward(0.0, 0);
+    motor.configNominalOutputReverse(0.0, 0);
   }
 
   public static void initTalon(TalonSRX motor) {
