@@ -18,7 +18,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
+import frc.robot.commands.AutoArm;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
 
 /**
@@ -34,6 +35,9 @@ public class Robot extends TimedRobot {
   public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
 
+public static Arm arm;
+public AutoArm armCommand;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -46,6 +50,7 @@ public class Robot extends TimedRobot {
     pdp = new PowerDistributionPanel();
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
+    arm = new Arm();
   }
 
   /**
@@ -86,6 +91,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+   armCommand = new AutoArm();
+   armCommand.schedule();
   }
 
   /**
