@@ -17,7 +17,8 @@ package frc.robot;
  */
 public final class Constants {
   // Controller Mappings
-  public final static int MAIN_CONTROLLER = 0;
+  public final static int CONTROLLER_MAIN = 0;
+  public final static int CONTROLLER_ARM = 1;
 
   // CAN Motor Controller Mappings
   public final static int DRIVEBASE_LEFT_MAIN_TALON = 2;

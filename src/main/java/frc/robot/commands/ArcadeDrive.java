@@ -38,7 +38,7 @@ public class ArcadeDrive extends CommandBase {
       * (1 + 0.3 * throttle) * (0.85 - 0.65 * throttle) // maybe replace this with 0.85 - 0.55 * throttle instead of a quadratic 
       * (forward == 0 ? 0.6 : 0.35);
 
-    if (Robot.oi.main.rightBumberPressed()) reversed = !reversed;
+    if (Robot.oi.main.rightBumperPressed()) reversed = !reversed;
     if (reversed) {
       forward *= -1;
     }

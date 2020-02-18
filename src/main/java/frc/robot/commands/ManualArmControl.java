@@ -9,7 +9,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.Arm;
 
 public class ManualArmControl extends CommandBase {
 
@@ -25,7 +24,7 @@ public class ManualArmControl extends CommandBase {
 
   @Override
   public void execute() {
-    throttle = (0.55 - (0.3 * Robot.oi.getArmRightTrigger()));
+    throttle = 0.55 - 0.3 * Robot.oi.arm.rightTrigger();
     Robot.arm.setArm(throttle);
   }
   
@@ -36,6 +35,5 @@ public class ManualArmControl extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-
-}
+  }
 }

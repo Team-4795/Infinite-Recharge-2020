@@ -14,9 +14,10 @@ public class RobotContainer {
   // private double value;
   // private POVButton MainDPadDown, MainDPadUp;
   public Controller main;
+  public Controller arm;
   public RobotContainer() { 
-    main = new Controller(Constants.MAIN_CONTROLLER);
-    // arm = new Joystick(Constants.ARM_CONTROLLER);
+    main = new Controller(Constants.CONTROLLER_MAIN);
+    arm = new Controller(Constants.CONTROLLER_ARM);
     // YButton = new JoystickButton(main, 4);
     // AButton = new JoystickButton(main, 1);
     // XButton = new JoystickButton(main, 3);
