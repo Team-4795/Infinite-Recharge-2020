@@ -69,9 +69,9 @@ public class Arm extends SubsystemBase {
     armMotor.setIdleMode(IdleMode.kBrake);
     armMotor.setOpenLoopRampRate(0.5);
     armMotor.setClosedLoopRampRate(0.5);
-    // ArmMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
-    // ArmMotor.setParameter(ConstantParameter.kCanID, RobotContainer.ARM_MOTOR.value);
-    // ArmMotor.setInverted(true);
+    // armMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
+    // armMotor.setParameter(ConstantParameter.kCanID, RobotContainer.ARM_MOTOR.value);
+    // armMotor.setInverted(true);
     armController.setP(kP, 0);
     armController.setI(kI, 0);
     armController.setIZone(20, 0);

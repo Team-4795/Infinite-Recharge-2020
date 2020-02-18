@@ -26,6 +26,10 @@ public class ManualArmControl extends CommandBase {
   public void execute() {
     throttle = 0.55 - 0.3 * Robot.oi.arm.rightTrigger();
     Robot.arm.setArm(throttle);
+    // Robot.arm.actuate(Robot.oi.getArmLeftJoyY() * throttle);
+    // if (Robot.oi.main.getB()) {
+    //   Robot.arm.spinner.set(ControlMode.PercentOutput, 0.9);
+    // }
   }
   
   @Override

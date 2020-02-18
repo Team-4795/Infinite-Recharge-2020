@@ -36,8 +36,9 @@ public class Drivebase extends SubsystemBase {
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
   private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
   private static final int kEncoderCountPerRevolution = 18148;
+  private static final double kEncoderCountPerMeter = kEncoderCountPerRevolution / (Units.inchesToMeters(6) * Math.PI);
+
   private static final double kP = 1; // TODO: tune PID
   private static final double kI = 0;
   private static final double kD = 0;
@@ -81,14 +82,6 @@ public class Drivebase extends SubsystemBase {
 
   public Drivebase() {
     m_gyro.reset();
-    // Set the distance per pulse for the drive encoders. We can simply use the
-    // distance traveled for one rotation of the wheel divided by the encoder
-    // resolution.
-    // m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
-    // m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
-
-    // m_leftEncoder.reset();
-    // m_rightEncoder.reset();
 
     m_odometry = new DifferentialDriveOdometry(getAngle());
 

@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.I2C;
 
 public class ColorSensor {
   private java.util.Timer executor;
-  private static final long THREAD_PERIOD = 20; //ms - max poll rate on sensor.
+  private static final long THREAD_PERIOD = 20; // ms - max poll rate on sensor.
   
   public static final byte CS_ADDRESS = 0x39;
 
@@ -84,11 +84,11 @@ public class ColorSensor {
     return cs.write(reg.getVal(), value);
   }
 
-  private byte read8(reg_t reg) {
-    byte[] vals = new byte[1];
-    readLen(reg, vals);
-    return vals[0];
-  }
+  // private byte read8(reg_t reg) {
+  //   byte[] vals = new byte[1];
+  //   readLen(reg, vals);
+  //   return vals[0];
+  // }
 
   private short read16(reg_t reg) {
     byte[] vals = new byte[2];
