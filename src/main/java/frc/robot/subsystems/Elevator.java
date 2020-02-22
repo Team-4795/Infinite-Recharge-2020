@@ -83,6 +83,10 @@ public class Elevator extends SubsystemBase {
     setDownPosition(type);
   }
 
+  public void set(double speed) {
+    elevatorMotor.set(speed);
+  }
+
   
 
   @Override

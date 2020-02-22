@@ -17,7 +17,7 @@ public class RobotContainer {
   public Controller arm;
   public RobotContainer() { 
     main = new Controller(Constants.CONTROLLER_MAIN);
-    arm = new Controller(Constants.CONTROLLER_ARM);
+    arm = new Controller(Constants.CONTROLLER_MAIN);
     // YButton = new JoystickButton(main, 4);
     // AButton = new JoystickButton(main, 1);
     // XButton = new JoystickButton(main, 3);
