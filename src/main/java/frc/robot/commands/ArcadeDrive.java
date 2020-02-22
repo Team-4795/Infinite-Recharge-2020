@@ -32,13 +32,13 @@ public class ArcadeDrive extends CommandBase {
 
   @Override
   public void execute() {
-    double throttle = Robot.oi.main.rightTrigger();
-    double forward = Robot.oi.main.leftJoystick().y * (0.85 - 0.65 * throttle);
-    double turn = Robot.oi.main.rightJoystick().x
+    double throttle = Robot.rc.main.rightTrigger();
+    double forward = Robot.rc.main.leftJoystick().y * (0.85 - 0.65 * throttle);
+    double turn = Robot.rc.main.rightJoystick().x
       * (1 + 0.3 * throttle) * (0.85 - 0.65 * throttle) // maybe replace this with 0.85 - 0.55 * throttle instead of a quadratic 
       * (forward == 0 ? 0.6 : 0.35);
 
-    if (Robot.oi.main.rightBumperPressed()) reversed = !reversed;
+    if (Robot.rc.main.rightBumperPressed()) reversed = !reversed;
     if (reversed) {
       forward *= -1;
     }
@@ -46,13 +46,13 @@ public class ArcadeDrive extends CommandBase {
     SmartDashboard.putNumber("Left Encoder Count", Robot.drivebase.getLeftEncoderCount());
     SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
 
-    if (Robot.oi.main.getB()) {
+    if (Robot.rc.main.getB()) {
       Robot.drivebase.drive(0.3, 0.2);
     } else {
       Robot.drivebase.setMotors(forward - turn, forward + turn);
     }
 
-    if (Robot.oi.main.backButtonPressed()) {
+    if (Robot.rc.main.backButtonPressed()) {
       System.exit(0);
     }
     //   if (Robot.oi.getMainAButtonPressed()) {

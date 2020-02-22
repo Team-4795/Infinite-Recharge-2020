@@ -9,7 +9,9 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.kauailabs.navx.frc.AHRS;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+
+// import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -24,7 +26,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.controller.PIDController;
+// import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,13 +35,12 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ManualArmControl;
-import java.time.Duration;
 
 public class Arm extends SubsystemBase {
 
   private final CANSparkMax armMotor;
 
-  private final TalonSRX intake;
+  private final TalonSRX roller;
   // soft limit for arm in encoder ticks
   private final static double kLowerLimit = -77.69;
 
@@ -53,18 +54,22 @@ public class Arm extends SubsystemBase {
   private final static double kF = 0.0002;
   private final static double kTolerance = 5.0;
 
+  private final int kEncoderRotsPerSpinner = 0;
+
   private final CANEncoder armEncoder;
   private final CANDigitalInput topLimit;
 
   private double up;
   private double down;
+  private boolean isRollerForward; 
 
   public Arm() {
+    isRollerForward = true; 
     armMotor = new CANSparkMax(Constants.ARM_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
     armController = new CANPIDController(armMotor);
     armEncoder = new CANEncoder(armMotor);
     topLimit = new CANDigitalInput(armMotor, LimitSwitch.kReverse, LimitSwitchPolarity.kNormallyOpen);
-    intake = new TalonSRX(Constants.ARM_INTAKE);
+    roller = new TalonSRX(Constants.ARM_ROLLER);
 
     armMotor.setIdleMode(IdleMode.kBrake);
     armMotor.setOpenLoopRampRate(0.5);
@@ -82,13 +87,12 @@ public class Arm extends SubsystemBase {
     armController.setSmartMotionMaxAccel(2750, 0); 
     armController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
     armController.setSmartMotionAllowedClosedLoopError(1.0, 0); 
-  }
 
+    roller.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    roller.setSelectedSensorPosition(0);
+  }
   public void setArm(double speed) {
     armMotor.set(speed);
-  }
-  public void setIntake(double speed) {
-    intake.set(ControlMode.PercentOutput, speed);
   }
   public double getPos() {
     return armEncoder.getPosition();
@@ -116,22 +120,19 @@ public class Arm extends SubsystemBase {
     armController.setReference(up, ControlType.kSmartMotion);
   }
 
-  public void setMotorWithTicks(boolean isNeg) {
-    double mult = isNeg ? -1.0 : 1.0;
-    // int ticks = 0;
-    // while (ticks < 100) {
-    //   this.setIntake(0.5 * mult);
-    //   ticks += 1;
-    // }
-    this.setIntake(0.5 * mult); // FIXME: ticks
-    mult = 1.0;
+  public void setMotorRoller(boolean isForward) {
+    double mult = isForward ? -1.0 : 1.0;
+    roller.set(ControlMode.Position, 4 * kEncoderRotsPerSpinner*mult);
   }
 
   public void ballPickUp() {
     this.intake();
-    this.setMotorWithTicks(true);
+    this.setMotorRoller(isRollerForward);
+  }
+
+  public void ballOutTake() {
     this.outtake();
-    this.setMotorWithTicks(false);
+    this.setMotorRoller(!isRollerForward);
   }
 
   public void setPosition(double position) {
