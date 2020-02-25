@@ -7,6 +7,9 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
@@ -15,15 +18,12 @@ import com.revrobotics.ControlType;
 import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMax.IdleMode;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
   /*
    * Creates a new Elevator.
    */
-
 
   private final CANPIDController elevatorController;
   private final CANSparkMax elevatorMotor;
@@ -44,7 +44,7 @@ public class Elevator extends SubsystemBase {
   private final static double kTolerance = 5.0;
 
   public Elevator() {
-    elevatorMotor = new CANSparkMax(Constants.ARM_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
+    elevatorMotor = new CANSparkMax(Constants.ELEVATOR_MOTOR_SPARK, CANSparkMaxLowLevel.MotorType.kBrushless);
     elevatorController = new CANPIDController(elevatorMotor);
     elevatorEncoder = new CANEncoder(elevatorMotor);
 
@@ -65,7 +65,6 @@ public class Elevator extends SubsystemBase {
     elevatorController.setSmartMotionMaxAccel(2750, 0);
     elevatorController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
     elevatorController.setSmartMotionAllowedClosedLoopError(1.0, 0);
-
   }
 
   public void setUpPosition(int type) {
@@ -78,7 +77,7 @@ public class Elevator extends SubsystemBase {
 
   public void climb(int type) {
     SmartDashboard.putNumber("Elevator Position (PID)", elevatorEncoder.getPosition());
-      SmartDashboard.putNumber("Elevator Output", elevatorMotor.getAppliedOutput());
+    SmartDashboard.putNumber("Elevator Output", elevatorMotor.getAppliedOutput());
     setUpPosition(type);
     setDownPosition(type);
   }
@@ -86,8 +85,6 @@ public class Elevator extends SubsystemBase {
   public void set(double speed) {
     elevatorMotor.set(speed);
   }
-
-  
 
   @Override
   public void periodic() {

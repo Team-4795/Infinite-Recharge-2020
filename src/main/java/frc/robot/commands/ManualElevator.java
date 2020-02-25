@@ -10,11 +10,11 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 
-public class ManualClimber extends CommandBase {
+public class ManualElevator extends CommandBase {
   /**
-   * Creates a new ManualCLimber.
+   * Creates a new ManualElevator.
    */
-  public ManualClimber() {
+  public ManualElevator() {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(Robot.elevator); 
   }
@@ -27,7 +27,7 @@ public class ManualClimber extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Robot.elevator.set(Robot.rc.arm.leftTrigger());
+    Robot.elevator.set((Robot.rc.arm.getY() ? 1 : 0) - (Robot.rc.arm.getA() ? 1 : 0));
   }
 
   // Called once the command ends or is interrupted.
