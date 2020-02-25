@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.commands.AutoArm;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
+import frc.robot.subsystems.Spinner;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -35,8 +36,9 @@ public class Robot extends TimedRobot {
   public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
 
-public static Arm arm;
-public AutoArm armCommand;
+  public static Arm arm;
+  public static Spinner spinner;
+  public AutoArm armCommand; // FIXME: what
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -51,6 +53,7 @@ public AutoArm armCommand;
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
     arm = new Arm();
+    spinner = new Spinner();
   }
 
   /**

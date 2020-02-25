@@ -68,10 +68,10 @@ public class ColorSensor {
   private void update() {
     ColorData colorData = new ColorData();
 
-    colorData.clear = (read16(reg_t.CS_CDATA) & 0xffff) / 65535.0;
-    colorData.red = (read16(reg_t.CS_RDATA) & 0xffff) / 65535.0;
-    colorData.green = (read16(reg_t.CS_GDATA) & 0xffff) / 65535.0;
-    colorData.blue = (read16(reg_t.CS_BDATA) & 0xffff) / 65535.0;
+    colorData.clear = (read16(reg_t.CS_CDATA) & 0xffff) / 65536.0;
+    colorData.red = (read16(reg_t.CS_RDATA) & 0xffff) / 65536.0;
+    colorData.green = (read16(reg_t.CS_GDATA) & 0xffff) / 65536.0;
+    colorData.blue = (read16(reg_t.CS_BDATA) & 0xffff) / 65536.0;
 
     color = colorData;
   }

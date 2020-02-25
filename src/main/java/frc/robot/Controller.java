@@ -72,6 +72,9 @@ public class Controller {
   public boolean pressedY() {
     return raw.getRawButtonPressed(4);
   }
+  public boolean releasedY() {
+    return raw.getRawButtonReleased(4);
+  }
   public boolean leftBumper() {
     return raw.getRawButton(5);
   }

@@ -8,6 +8,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+
 import frc.robot.Robot;
 
 public class ManualArmControl extends CommandBase {
@@ -25,8 +26,8 @@ public class ManualArmControl extends CommandBase {
   @Override
   public void execute() {
     throttle = 0.55 - 0.3 * Robot.oi.arm.rightTrigger();
-    Robot.arm.setArm(throttle);
-    // Robot.arm.actuate(Robot.oi.getArmLeftJoyY() * throttle);
+    // Robot.arm.setArm(throttle);
+    // Robot.arm.actuate(Robot.oi.arm.leftJoystick().y * throttle);
     // if (Robot.oi.main.getB()) {
     //   Robot.arm.spinner.set(ControlMode.PercentOutput, 0.9);
     // }

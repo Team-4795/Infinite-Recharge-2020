@@ -7,9 +7,10 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -21,19 +22,8 @@ import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
 import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMax.IdleMode;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import frc.robot.Constants;
-import frc.robot.Robot;
-import frc.robot.RobotContainer;
 import frc.robot.commands.ManualArmControl;
-import java.time.Duration;
 
 public class Arm extends SubsystemBase {
 
@@ -105,9 +95,9 @@ public class Arm extends SubsystemBase {
     armEncoder.setPosition(0.0);
   }
 
-  // public void actuate(final double output) {
-        
-  // }
+  public void actuate(double speed) {
+    armController.setReference(speed, ControlType.kVoltage); // FIXME: * 12 for voltage?
+  }
 
   public void intake() {
     armController.setReference(down, ControlType.kSmartMotion);
