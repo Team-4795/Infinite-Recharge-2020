@@ -11,7 +11,6 @@ package frc.robot;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
@@ -20,6 +19,7 @@ import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
@@ -41,7 +41,7 @@ public class RobotContainer {
   private static final double DEADZONE = 0.15;
 
   private final double kS = 0.993;
-  private final double kV = 0.00239; 
+  private final double kV = 0.00240; 
   private final double kA = 0.000212; 
 
   public Joystick main;
@@ -180,6 +180,7 @@ public class RobotContainer {
   // }
 
   public Command getAutonomousCommand() {
+    drive.resetHeading();
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
             new SimpleMotorFeedforward(kS, kV, kA), drive.getKinematics(), 12
@@ -190,11 +191,11 @@ public class RobotContainer {
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
       Arrays.asList(
           new Pose2d(0.0, 0.0, new Rotation2d(0.0)),
-          new Pose2d(2.0, 2.0, new Rotation2d(0.0))),
+          new Pose2d(-2.0, -2.0, new Rotation2d(0.0))),
           config);
     RamseteCommand command = new RamseteCommand(trajectory, 
                   drive::getPose, 
-                  new RamseteController(2.0, 0.7), 
+                  new RamseteController(2.0, 0.8), 
                   drive.getFeedForward(), 
                   drive.getKinematics(), 
                   drive::getSpeeds, 

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -50,7 +51,7 @@ public class Drivebase extends SubsystemBase {
   public SimpleMotorFeedforward feedforward;
   public PIDController pidRight;
   public PIDController pidLeft;
-  private final double kP = 0.000808;
+  private final double kP = 0.000908;
   private final double kI = 0.0;
   private final double kD = 0.0;
   // private final VictorSPX rightMotorThree;
@@ -67,14 +68,15 @@ public class Drivebase extends SubsystemBase {
   // private final double kF = .065;
   // public final int allowableError = 100;
 
-  private final double WHEEL_DIAMETER_IN = 8.0;
+  private final double kWheelDiameter = Units.inchesToMeters(6.0);
   private final int ENCODER_COUNTS_PER_REV = 4096;
-  public final double ENCODER_COUNTS_PER_FT = 4096;
+  private final double kEncoderCountPerRevolution = 18148;
+  private final double ENCODER_COUNTS_PER_METER = kEncoderCountPerRevolution / (kWheelDiameter * Math.PI);
   // in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
   public Drivebase() {
     gyro = new AHRS(SPI.Port.kMXP);
-    kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(20));
+    kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(24));
     odometry = new DifferentialDriveOdometry(getHeading());
     feedforward = new SimpleMotorFeedforward(kS, kV, kA); 
     pidRight = new PIDController(kP, kI, kD);
@@ -127,11 +129,16 @@ public class Drivebase extends SubsystemBase {
     rightMotorFollower.follow(rightMotor);
     // rightMotorThree.follow(rightMotorOne);
     
-    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
 
     rightMotor.setSelectedSensorPosition(0);
     leftMotor.setSelectedSensorPosition(0);
+  }
+  public void resetHeading() {
+    gyro.zeroYaw();
+    gyro.setAngleAdjustment(-gyro.getAngle());
+    
   }
 
   public Rotation2d getHeading() {
@@ -169,26 +176,28 @@ public class Drivebase extends SubsystemBase {
   //   return rightMotorOne.getSelectedSensorPosition();
   // }
 
-  public double getLeftEncoderFeet() {
-    return leftMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
+  public double getLeftEncoderMeter() {
+    return leftMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_METER;
   }
 
-  public double getRightEncoderFeet() {
-    return rightMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_FT;
+  public double getRightEncoderMeter() {
+    return rightMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_METER;
   }
 
-  // //should give velocity in ft per second
+  // Should give velocity in meters per second
   public double getLeftVelocity() {
-    return leftMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
+    // 10x multiplier because the returned value is the distance in 100ms
+    return leftMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_METER;
   }
 
   public double getRightVelocity() {
-    return rightMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
+    // 10x multiplier because the returned value is the distance in 100ms
+    return rightMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_METER;
   }
 
   public void setOutput(double leftVoltage, double rightVoltage) {
-    leftMotor.set(ControlMode.PercentOutput, leftVoltage/2);
-    rightMotor.set(ControlMode.PercentOutput, rightVoltage/2);
+    leftMotor.set(ControlMode.PercentOutput, leftVoltage / 5);
+    rightMotor.set(ControlMode.PercentOutput, rightVoltage / 5);
 
   }
 
@@ -219,14 +228,22 @@ public class Drivebase extends SubsystemBase {
 
   public DifferentialDriveWheelSpeeds getSpeeds() {
     return new DifferentialDriveWheelSpeeds(
-      getLeftVelocity() / 7.29 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60,
-      getRightVelocity() / 7.29 * 2 * Math.PI * Units.inchesToMeters(3.0) / 60);
+      getLeftVelocity(), // 7.29 * Math.PI * kWheelDiameter / 60,
+      getRightVelocity()); // 7.29 * Math.PI * kWheelDiameter / 60);
   }
   
 
 
   @Override
   public void periodic() {
-    pose = odometry.update(getHeading(), getLeftEncoderFeet(), getRightEncoderFeet());
+    pose = odometry.update(getHeading(), getLeftEncoderMeter(), getRightEncoderMeter());
+    SmartDashboard.putNumber("heading (deg)", gyro.getAngle());
+    SmartDashboard.putNumber("encoder left (m)", getLeftEncoderMeter());
+    SmartDashboard.putNumber("raw en23456coder", leftMotor.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("raw encodbhdtdbhtdhtbr", leftMotor.getSelectedSensorPosition(0));
+    SmartDashboard.putNumber("encoder right (m)", getRightEncoderMeter());
+    SmartDashboard.putNumber("odometry x (m)", pose.getTranslation().getX());
+    SmartDashboard.putNumber("odometry y (m)", pose.getTranslation().getY());
+    SmartDashboard.putNumber("odometry angle (deg)", pose.getRotation().getDegrees());
   }
 }
