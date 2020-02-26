@@ -11,16 +11,12 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import com.kauailabs.navx.frc.AHRS.BoardAxis;
 import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 //import com.kauailabs.navx.frc.AHRS;
 // import com.kauailabs.navx.frc.AHRS.BoardAxis;
 // import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
@@ -38,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.commands.ArcadeDrive;
 
 public class Drivebase extends SubsystemBase {
   public final TalonSRX leftMotor;
@@ -66,7 +61,6 @@ public class Drivebase extends SubsystemBase {
 
   private static final double kTrackWidth = 0.381 * 2; // meters
   private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
-  private static final int kEncoderCountPerRevolution = 18148;
 
   // private final static double P = -0.009;
   // private final static double I = 0.0;
@@ -80,9 +74,9 @@ public class Drivebase extends SubsystemBase {
   // public final int allowableError = 100;
 
   private final double kWheelDiameter = Units.inchesToMeters(6.0);
-  private final int ENCODER_COUNTS_PER_REV = 4096;
+  // private final int ENCODER_COUNTS_PER_REV = 4096;
   private final double kEncoderCountPerRevolution = 18148;
-  private final double ENCODER_COUNTS_PER_METER = kEncoderCountPerRevolution / (kWheelDiameter * Math.PI);
+  // private final double ENCODER_COUNTS_PER_METER = kEncoderCountPerRevolution / (kWheelDiameter * Math.PI);
   // in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
   public Drivebase() {
@@ -198,26 +192,18 @@ public class Drivebase extends SubsystemBase {
   // Should give velocity in meters per second
   public double getLeftVelocity() {
     // 10x multiplier because the returned value is the distance in 100ms
-    return leftMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_METER;
+    return leftMotor.getSelectedSensorVelocity() * 10 / kEncoderCountPerMeter;
   }
 
   public double getRightVelocity() {
     // 10x multiplier because the returned value is the distance in 100ms
-    return rightMotor.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_METER;
+    return rightMotor.getSelectedSensorVelocity() * 10 / kEncoderCountPerMeter;
   }
 
   public void setOutput(double leftVoltage, double rightVoltage) {
     leftMotor.set(ControlMode.PercentOutput, leftVoltage / 5);
     rightMotor.set(ControlMode.PercentOutput, rightVoltage / 5);
-
   }
-
-  // public void TurnToAngle(double angle) {
-  //   Robot.ahrs.reset();
-  //   turnController.reset();
-  //   turnController.setSetpoint(angle);
-  //   turnController.enable();
-  // }
   
   // public void driveFeet(double feet) {
   //   this.resetEncoders();
@@ -236,22 +222,14 @@ public class Drivebase extends SubsystemBase {
       getRightVelocity()); // 7.29 * Math.PI * kWheelDiameter / 60);
   }
   
-
-  /**
-   * Updates the field-relative position.
-   */
-//   public void updateOdometry() {
-//     m_odometry.update(getAngle(), getLeftEncoderMeters(), getRightEncoderMeters());
-//   }
-
   @Override
   public void periodic() {
-    pose = odometry.update(getHeading(), getLeftEncoderMeter(), getRightEncoderMeter());
+    pose = odometry.update(getHeading(), getLeftEncoderMeters(), getRightEncoderMeters());
     SmartDashboard.putNumber("heading (deg)", gyro.getAngle());
-    SmartDashboard.putNumber("encoder left (m)", getLeftEncoderMeter());
+    SmartDashboard.putNumber("encoder left (m)", getLeftEncoderMeters());
     SmartDashboard.putNumber("raw sensor velocity", leftMotor.getSelectedSensorVelocity());
     SmartDashboard.putNumber("raw sensor position", leftMotor.getSelectedSensorPosition(0));
-    SmartDashboard.putNumber("encoder right (m)", getRightEncoderMeter());
+    SmartDashboard.putNumber("encoder right (m)", getRightEncoderMeters());
     SmartDashboard.putNumber("odometry x (m)", pose.getTranslation().getX());
     SmartDashboard.putNumber("odometry y (m)", pose.getTranslation().getY());
     SmartDashboard.putNumber("odometry angle (deg)", pose.getRotation().getDegrees());

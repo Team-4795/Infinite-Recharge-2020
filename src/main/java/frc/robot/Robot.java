@@ -33,11 +33,11 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   public static RobotContainer rc;
-  // public static Drivebase drivebase;
+  public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
 
-public static Arm arm;
-public AutoArm armCommand;
+  public static Arm arm;
+  public AutoArm armCommand;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -107,7 +107,7 @@ public AutoArm armCommand;
 
   @Override
   public void teleopInit() {
-    Robot.rc.drive.resetHeading();
+    Robot.drivebase.resetHeading();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

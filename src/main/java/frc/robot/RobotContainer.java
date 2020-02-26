@@ -29,30 +29,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-// import frc.robot.commands.ArcadeDrive;
-// import frc.robot.commands.ArmToPosition;
-import frc.robot.Constants;
-import frc.robot.commands.ArcadeDrive;
+
 import frc.robot.subsystems.Drivebase;
 
 public class RobotContainer {
   private static final double DEADZONE = 0.15;
-  private Drivebase drive;
   private final double kS = 0.993;
   private final double kV = 0.00240; 
   private final double kA = 0.000212; 
 
-  public Joystick main;
   // private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
   // private double value;
   // private POVButton MainDPadDown, MainDPadUp;
   public Controller main;
   public Controller arm;
   public RobotContainer() { 
-
-    drive = Robot.drivebase;
-    drive.setDefaultCommand(new ArcadeDrive(drive));
-    String trajectoryJSON = "PathWeaver/pathweaver.json" ;
+    // String trajectoryJSON = "PathWeaver/pathweaver.json" ;
     // try {
     //   Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
     //   Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
@@ -85,29 +77,29 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    drive.resetHeading();
+    Robot.drivebase.resetHeading();
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
-            new SimpleMotorFeedforward(kS, kV, kA), drive.getKinematics(), 12
+            new SimpleMotorFeedforward(kS, kV, kA), Robot.drivebase.getKinematics(), 12
         );
 
     TrajectoryConfig config = new TrajectoryConfig(Units.feetToMeters(2), Units.feetToMeters(2));
-    config.setKinematics(drive.getKinematics()).addConstraint(autoVoltageConstraint);
+    config.setKinematics(Robot.drivebase.getKinematics()).addConstraint(autoVoltageConstraint);
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
       Arrays.asList(
           new Pose2d(0.0, 0.0, new Rotation2d(0.0)),
           new Pose2d(-2.0, -2.0, new Rotation2d(0.0))),
           config);
     RamseteCommand command = new RamseteCommand(trajectory, 
-                  drive::getPose, 
+                  Robot.drivebase::getPose, 
                   new RamseteController(2.0, 0.8), 
-                  drive.getFeedForward(), 
-                  drive.getKinematics(), 
-                  drive::getSpeeds, 
-                  drive.getLeftPID(), 
-                  drive.getRightPID(), 
-                  drive::setOutput, 
-                  drive);
+                  Robot.drivebase.getFeedForward(), 
+                  Robot.drivebase.getKinematics(), 
+                  Robot.drivebase::getSpeeds, 
+                  Robot.drivebase.getLeftPID(), 
+                  Robot.drivebase.getRightPID(), 
+                  Robot.drivebase::setOutput, 
+                  Robot.drivebase);
 
     
     return command;
