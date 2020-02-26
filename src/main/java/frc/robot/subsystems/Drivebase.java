@@ -1,6 +1,6 @@
 
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2018-2019 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -21,6 +21,10 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+//import com.kauailabs.navx.frc.AHRS;
+// import com.kauailabs.navx.frc.AHRS.BoardAxis;
+// import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
+
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -31,6 +35,7 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.ArcadeDrive;
@@ -56,6 +61,12 @@ public class Drivebase extends SubsystemBase {
   private final double kD = 0.0;
   // private final VictorSPX rightMotorThree;
   // public final PIDController turnController;
+  public static final double kMaxSpeed = 3.0; // meters per second
+  public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
+
+  private static final double kTrackWidth = 0.381 * 2; // meters
+  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
+  private static final int kEncoderCountPerRevolution = 18148;
 
   // private final static double P = -0.009;
   // private final static double I = 0.0;
@@ -82,6 +93,15 @@ public class Drivebase extends SubsystemBase {
     pidRight = new PIDController(kP, kI, kD);
     pidLeft = new PIDController(kP, kI, kD);
 
+    // Set the distance per pulse for the drive encoders. We can simply use the
+    // distance traveled for one rotation of the wheel divided by the encoder
+    // resolution.
+    // m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    // m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+
+    // m_leftEncoder.reset();
+    // m_rightEncoder.reset();
+
     // turnController = new PIDController(P, I, D, Robot.ahrs, this);
     // turnController.setInputRange(-180.0f, 180.0f);
     // turnController.setOutputRange(-0.6, 0.6);
@@ -89,11 +109,9 @@ public class Drivebase extends SubsystemBase {
     // turnController.setContinuous();
 
     leftMotor = new TalonSRX(Constants.DRIVEBASE_LEFT_MAIN_TALON);
-    leftMotorFollower = new TalonSRX(Constants.DRIVEBASE_LEFT_FOLLOWER_VICTOR);
-    // leftMotorThree = new VictorSPX(Constants.LEFT_MOTOR_THREE);
+    leftMotorFollower = new TalonSRX(Constants.DRIVEBASE_LEFT_FOLLOWER_TALON);
     rightMotor = new TalonSRX(Constants.DRIVEBASE_RIGHT_MAIN_TALON);
     rightMotorFollower = new TalonSRX(Constants.DRIVEBASE_RIGHT_FOLLOWER_TALON);
-    // rightMotorThree = new VictorSPX(Constants.DRIVEBASE_RIGHT_VICTOR);
 
     // leftMotorOne.config_kP(0, kP);
     // leftMotorOne.config_kI(0, kI);
@@ -115,22 +133,18 @@ public class Drivebase extends SubsystemBase {
     rightMotor.configOpenloopRamp(.4);
 
     // Robot.initVictor(leftMotorTwo);
-    // Robot.initVictor(leftMotorThree);
     // Robot.initVictor(rightMotorTwo);
-    // Robot.initVictor(rightMotorThree);
+
+    leftMotor.setInverted(false);
+    leftMotorFollower.setInverted(false);
+    leftMotorFollower.follow(leftMotor);
 
     rightMotor.setInverted(true);
     rightMotorFollower.setInverted(true);
-    // rightMotorThree.setInverted(true);
-
-    leftMotorFollower.follow(leftMotor);
-    // leftMotorThree.follow(leftMotorOne);
-
     rightMotorFollower.follow(rightMotor);
-    // rightMotorThree.follow(rightMotorOne);
     
-    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
     rightMotor.setSelectedSensorPosition(0);
     leftMotor.setSelectedSensorPosition(0);
@@ -138,7 +152,6 @@ public class Drivebase extends SubsystemBase {
   public void resetHeading() {
     gyro.zeroYaw();
     gyro.setAngleAdjustment(-gyro.getAngle());
-    
   }
 
   public Rotation2d getHeading() {
@@ -168,20 +181,18 @@ public class Drivebase extends SubsystemBase {
     return feedforward;
   }
 
-  // public double getLeftEncoderCount() {
-  //   return leftMotorOne.getSelectedSensorPosition();
-  // }
-
-  // public double getRightEncoderCount() {
-  //   return rightMotorOne.getSelectedSensorPosition();
-  // }
-
-  public double getLeftEncoderMeter() {
-    return leftMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_METER;
+  public int getLeftEncoderCount() {
+    return leftMotor.getSelectedSensorPosition();
+  }
+  public int getRightEncoderCount() {
+    return rightMotor.getSelectedSensorPosition();
   }
 
-  public double getRightEncoderMeter() {
-    return rightMotor.getSelectedSensorPosition() / ENCODER_COUNTS_PER_METER;
+  public double getLeftEncoderMeters() {
+    return leftMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
+  }
+  public double getRightEncoderMeters() {
+    return rightMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
   }
 
   // Should give velocity in meters per second
@@ -206,9 +217,7 @@ public class Drivebase extends SubsystemBase {
   //   turnController.reset();
   //   turnController.setSetpoint(angle);
   //   turnController.enable();
-    
   // }
-
   
   // public void driveFeet(double feet) {
   //   this.resetEncoders();
@@ -221,11 +230,6 @@ public class Drivebase extends SubsystemBase {
   //   leftMotorOne.setSelectedSensorPosition(0);
   // }
 
-  // @Override
-  // public void pidWrite(double output) {
-  //   setMotors(output, -output);
-  // }
-
   public DifferentialDriveWheelSpeeds getSpeeds() {
     return new DifferentialDriveWheelSpeeds(
       getLeftVelocity(), // 7.29 * Math.PI * kWheelDiameter / 60,
@@ -233,14 +237,20 @@ public class Drivebase extends SubsystemBase {
   }
   
 
+  /**
+   * Updates the field-relative position.
+   */
+//   public void updateOdometry() {
+//     m_odometry.update(getAngle(), getLeftEncoderMeters(), getRightEncoderMeters());
+//   }
 
   @Override
   public void periodic() {
     pose = odometry.update(getHeading(), getLeftEncoderMeter(), getRightEncoderMeter());
     SmartDashboard.putNumber("heading (deg)", gyro.getAngle());
     SmartDashboard.putNumber("encoder left (m)", getLeftEncoderMeter());
-    SmartDashboard.putNumber("raw en23456coder", leftMotor.getSelectedSensorVelocity());
-    SmartDashboard.putNumber("raw encodbhdtdbhtdhtbr", leftMotor.getSelectedSensorPosition(0));
+    SmartDashboard.putNumber("raw sensor velocity", leftMotor.getSelectedSensorVelocity());
+    SmartDashboard.putNumber("raw sensor position", leftMotor.getSelectedSensorPosition(0));
     SmartDashboard.putNumber("encoder right (m)", getRightEncoderMeter());
     SmartDashboard.putNumber("odometry x (m)", pose.getTranslation().getX());
     SmartDashboard.putNumber("odometry y (m)", pose.getTranslation().getY());

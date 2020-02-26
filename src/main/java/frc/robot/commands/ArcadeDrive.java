@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2018-2019 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -9,6 +9,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
@@ -16,16 +17,14 @@ import frc.robot.subsystems.Drivebase;
 
 public class ArcadeDrive extends CommandBase {
 
-  /*private double maxVel;
-  private double pastVel;
-  private double maxAccel;*/
-  private final Boolean reversed;
-  public Drivebase drivebase;
+  private boolean reversed;
+  // private int temp;
+  // private double maxVel;
+  // private double pastVel;
+  // private double maxAccel;
 
-  public ArcadeDrive(final Drivebase drive) {
-  
-    addRequirements(drive);
-    drivebase = drive;
+  public ArcadeDrive() {
+    addRequirements(Robot.drivebase);
     reversed = false;
   }
 
@@ -35,28 +34,41 @@ public class ArcadeDrive extends CommandBase {
 
   @Override
   public void execute() {
-    double throttle = 0.85;// - 0.65 * Robot.oi.getMainRightTrigger();
-    double turn = Robot.rc.getMainRightJoyX() * (Robot.rc.getMainLeftJoyY() == 0 ? 0.6 : 0.35);
-    // if (Robot.oi.getMainRightTrigger() > 0.5) {
-    // turn *= 1.3;
-    // }
+    double throttle = Robot.oi.main.rightTrigger();
+    double forward = Robot.oi.main.leftJoystick().y * (0.85 - 0.65 * throttle);
+    double turn = Robot.oi.main.rightJoystick().x
+      * (1 + 0.3 * throttle) * (0.85 - 0.65 * throttle) // maybe replace this with 0.85 - 0.55 * throttle instead of a quadratic 
+      * (forward == 0 ? 0.6 : 0.35);
+
+    if (Robot.oi.main.rightBumperPressed()) reversed = !reversed;
     if (reversed) {
-      throttle *= -1;
-      turn *= -1;
+      forward *= -1;
+    }
+    SmartDashboard.putBoolean("Reversed Drivebase", reversed);
+    SmartDashboard.putNumber("Left Encoder Count", Robot.drivebase.getLeftEncoderCount());
+    SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
+
+    if (Robot.oi.main.getB()) {
+      Robot.drivebase.drive(0.3, 0.2);
+    } else {
+      Robot.drivebase.setMotors(forward - turn, forward + turn);
     }
 
-    SmartDashboard.putBoolean("Reversed Drivebase", reversed);
-    drivebase.setMotors((Robot.rc.getMainLeftJoyY() - turn) * throttle, (Robot.rc.getMainLeftJoyY() + turn) * throttle);
+    if (Robot.oi.main.backButtonPressed()) {
+      System.exit(0);
+    }
+    //   if (Robot.oi.getMainAButtonPressed()) {
+    //     temp = Robot.drivebase.getLeftEncoderCount();
+    //   }
+    //   int relativeOver = 18148 - Robot.drivebase.getLeftEncoderCount() + temp;
+    //   double speed = Math.min(0.2, relativeOver / 18148.0);
+    //   Robot.drivebase.setMotors(speed, speed);
 
-    /*
-     * maxVel = Math.abs(Robot.drivebase.getLeftVelocity()) > Math.abs(maxVel) ?
-     * Robot.drivebase.getLeftVelocity() : maxVel;
-     * SmartDashboard.putNumber("Max Velocity", maxVel); maxAccel =
-     * Math.abs(Math.abs(Robot.drivebase.getLeftVelocity()) - Math.abs(pastVel)) >
-     * Math.abs(maxAccel) ? (Math.abs(Robot.drivebase.getLeftVelocity()) -
-     * Math.abs(pastVel)) / 0.05 : maxAccel; pastVel =
-     * Robot.drivebase.getLeftVelocity();
-     */
+    // double vel = Robot.drivebase.getLeftVelocity();
+    // maxVel = Math.abs(vel) > Math.abs(maxVel) ? vel : maxVel;
+    // SmartDashboard.putNumber("Max Velocity", maxVel);
+    // maxAccel = Math.abs(vel - pastVel) > Math.abs(maxAccel) ? (vel - pastVel) : maxAccel;
+    // pastVel = vel;
   }
 
   @Override
@@ -65,6 +77,6 @@ public class ArcadeDrive extends CommandBase {
   }
 
   @Override
-  public void end(final boolean interrupted) {
-    }
+  public void end(boolean interrupted) {
+  }
 }

@@ -9,32 +9,27 @@ package frc.robot;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants.  This class should not be used for any other purpose.  All constants should be
- * declared globally (i.e. public static).  Do not put anything functional in this class.
+ * constants. This class should not be used for any other purpose. All constants should be
+ * declared globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  // //CAN Motor Controller Mappings
-  // LEFT_MOTOR_ONE(1),
-  // LEFT_MOTOR_TWO(2),
-  // // LEFT_MOTOR_THREE(3),
-  // RIGHT_MOTOR_ONE(4),
-  // RIGHT_MOTOR_TWO(5),
-  // // RIGHT_MOTOR_THREE(6),
-  // ARM_MOTOR(7),
-  // INTAKE_MOTOR(11),
-  // CLIMBER_WHEELS(12),
-  // HATCH_MOTOR(8),
-  // // CLIMBER_MOTOR(20),
-
   // Controller Mappings
-  public final static int MAIN_CONTROLLER = 0;
+  public final static int CONTROLLER_MAIN = 0;
+  public final static int CONTROLLER_ARM = 1;
 
   // CAN Motor Controller Mappings
-  public final static int DRIVEBASE_LEFT_FOLLOWER_VICTOR = 2;
-  public final static int DRIVEBASE_LEFT_MAIN_TALON = 3;
-  public final static int DRIVEBASE_RIGHT_FOLLOWER_TALON = 4;
-  public final static int DRIVEBASE_RIGHT_MAIN_TALON = 5;
+  public final static int DRIVEBASE_LEFT_MAIN_TALON = 2;
+  public final static int DRIVEBASE_LEFT_FOLLOWER_TALON = 3;
+  public final static int DRIVEBASE_RIGHT_MAIN_TALON = 4;
+  public final static int DRIVEBASE_RIGHT_FOLLOWER_TALON = 5;
+  public final static int ARM_MOTOR = 7;
+  public final static int ARM_SPINNER = 8;
+  public final static int ARM_INTAKE = 9;
+  // public final static int INTAKE_MOTOR = 11;
+  // public final static int CLIMBER_WHEELS = 12;
+  // public final static int HATCH_MOTOR = 8;
+  // public final static int CLIMBER_MOTOR = 20;
 }
