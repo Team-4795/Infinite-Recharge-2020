@@ -28,7 +28,7 @@ public class AutoClimb extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(Robot.rc.arm.leftTrigger() > 0.5) {
+    if (Robot.rc.arm.leftTrigger() > 0.5) {
       Robot.elevator.climb(2);
     }
   }

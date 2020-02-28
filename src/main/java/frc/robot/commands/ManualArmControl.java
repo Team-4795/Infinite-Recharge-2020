@@ -12,8 +12,6 @@ import frc.robot.Robot;
 
 public class ManualArmControl extends CommandBase {
 
-  private double throttle;
-
   public ManualArmControl() {
     addRequirements(Robot.arm);
   }
@@ -24,12 +22,8 @@ public class ManualArmControl extends CommandBase {
 
   @Override
   public void execute() {
-    throttle = 0.55 - 0.3*( Robot.rc.arm.rightTrigger() - Robot.rc.arm.leftTrigger());
-    Robot.arm.setArm(throttle);
-
-    if (Robot.rc.arm.getA()) {
-      Robot.arm.setMotorRoller(Robot.rc.arm.getB() ? true : false);
-    }
+    Robot.arm.setArm(Robot.rc.arm.leftJoystick().y);
+    Robot.arm.setRoller((Robot.rc.arm.getY() ? 1 : 0) - (Robot.rc.arm.getX() ? 1 : 0));
   }
   
   @Override

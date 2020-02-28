@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 // import com.kauailabs.navx.frc.AHRS;
@@ -40,7 +41,7 @@ public class Arm extends SubsystemBase {
 
   private final CANSparkMax armMotor;
 
-  private final TalonSRX roller;
+  private final VictorSPX roller;
   // soft limit for arm in encoder ticks
   private final static double kLowerLimit = -77.69;
 
@@ -61,15 +62,15 @@ public class Arm extends SubsystemBase {
 
   private double up;
   private double down;
-  private boolean isRollerForward; 
+  private boolean isRollerBackward; 
 
   public Arm() {
-    isRollerForward = true; 
+    isRollerBackward = true; 
     armMotor = new CANSparkMax(Constants.ARM_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
     armController = new CANPIDController(armMotor);
     armEncoder = new CANEncoder(armMotor);
     topLimit = new CANDigitalInput(armMotor, LimitSwitch.kReverse, LimitSwitchPolarity.kNormallyOpen);
-    roller = new TalonSRX(Constants.ARM_ROLLER);
+    roller = new VictorSPX(Constants.ARM_ROLLER);
 
     armMotor.setIdleMode(IdleMode.kBrake);
     armMotor.setOpenLoopRampRate(0.5);
@@ -120,19 +121,9 @@ public class Arm extends SubsystemBase {
     armController.setReference(up, ControlType.kSmartMotion);
   }
 
-  public void setMotorRoller(boolean isForward) {
-    double mult = isForward ? -1.0 : 1.0;
-    roller.set(ControlMode.Position, 4 * kEncoderRotsPerSpinner*mult);
-  }
-
-  public void ballPickUp() {
-    this.intake();
-    this.setMotorRoller(isRollerForward);
-  }
-
-  public void ballOutTake() {
-    this.outtake();
-    this.setMotorRoller(!isRollerForward);
+  public void setRoller(double speed) {
+    // roller.set(ControlMode.Position, 4 * kEncoderRotsPerSpinner * mult);
+    roller.set(ControlMode.PercentOutput, speed);
   }
 
   public void setPosition(double position) {

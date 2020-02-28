@@ -27,7 +27,7 @@ public class ManualElevator extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Robot.elevator.set((Robot.rc.arm.getY() ? 1 : 0) - (Robot.rc.arm.getA() ? 1 : 0));
+    Robot.elevator.set((Robot.rc.arm.getB() ? 1 : 0) - (Robot.rc.arm.getA() ? 1 : 0));
   }
 
   // Called once the command ends or is interrupted.
