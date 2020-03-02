@@ -23,6 +23,7 @@ import frc.robot.commands.ManualArmControl;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Spinner;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -40,6 +41,7 @@ public class Robot extends TimedRobot {
   public static Arm arm;
   public static Elevator elevator;
   public static ManualArmControl armCommand;
+  public static Spinner spinner;
 
 
   /**
@@ -55,7 +57,7 @@ public class Robot extends TimedRobot {
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
     arm = new Arm();
-    
+    spinner = new Spinner();
   }
 
   /**
