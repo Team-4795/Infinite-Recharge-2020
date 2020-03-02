@@ -36,7 +36,8 @@ public class Controller {
     } else if (raw.getButtonCount() > 13) {
       type = 2;
     } else {
-      throw new Error("Unknown controller found");
+      type = 1;
+      // throw new Error("Unknown controller found");
     }
   }
   public Vector2d leftJoystick() {
