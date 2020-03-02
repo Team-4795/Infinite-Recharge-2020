@@ -63,12 +63,6 @@ public class Drivebase extends SubsystemBase {
   private static final int kEncoderCountPerRevolution = 18148;
   private static final double kEncoderCountPerMeter = kEncoderCountPerRevolution / (Units.inchesToMeters(6) * Math.PI);
 
-  private static final double kP = 1; // TODO: tune PID
-  private static final double kI = 0;
-  private static final double kD = 0;
-  private static final double kF = 0;
-  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
-
   // private final static double P = -0.009;
   // private final static double I = 0.0;
   // private final static double D = -0.00;
