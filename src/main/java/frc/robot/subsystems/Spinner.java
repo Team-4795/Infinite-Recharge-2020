@@ -46,7 +46,7 @@ public class Spinner extends SubsystemBase {
   private int edgesRequired = 0;
   
   public Spinner() {
-    motor = new TalonSRX(Constants.SPINNER_TALON);
+    motor = new TalonSRX(Constants.ARM_SPINNER);
     Robot.masterTalon(motor);
   }
 

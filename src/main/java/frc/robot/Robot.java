@@ -19,8 +19,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.commands.AutoArm;
+import frc.robot.commands.ManualArmControl;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Spinner;
 
 /**
@@ -32,13 +34,15 @@ import frc.robot.subsystems.Spinner;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  public static RobotContainer oi;
+  public static AutoArm autoArmCommand;
+  public static RobotContainer rc;
   public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
-
   public static Arm arm;
+  public static Elevator elevator;
+  public static ManualArmControl armCommand;
   public static Spinner spinner;
-  public AutoArm armCommand; // FIXME: what
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -48,7 +52,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer. This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    oi = new RobotContainer();
+    rc = new RobotContainer();
     pdp = new PowerDistributionPanel();
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
@@ -88,14 +92,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = oi.getAutonomousCommand();
+    m_autonomousCommand = rc.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-    armCommand = new AutoArm();
-    armCommand.schedule();
+    autoArmCommand = new AutoArm();
+    autoArmCommand.schedule();
   }
 
   /**
@@ -121,6 +125,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    // armCommand = new ManualArmControl();
+    // armCommand.schedule();
   }
 
   @Override

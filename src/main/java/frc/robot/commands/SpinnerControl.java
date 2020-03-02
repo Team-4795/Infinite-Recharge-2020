@@ -38,14 +38,14 @@ public class SpinnerControl extends CommandBase {
 
   @Override
   public void execute() {
-    if (Robot.oi.main.pressedY()) {
+    if (Robot.rc.main.pressedY()) {
       SpinnerColor target = getGameData();
       if (target == SpinnerColor.NONE) {
         Robot.spinner.turnCycles(4);
       } else {
         Robot.spinner.turnTo(target);
       }
-    } else if (Robot.oi.main.releasedY()) {
+    } else if (Robot.rc.main.releasedY()) {
       Robot.spinner.disable();
     }
   }
