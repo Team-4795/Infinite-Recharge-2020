@@ -76,7 +76,6 @@ public class Drivebase extends SubsystemBase {
 
   private final double kWheelDiameter = Units.inchesToMeters(6.0);
   // private final int ENCODER_COUNTS_PER_REV = 4096;
-  private final double kEncoderCountPerRevolution = 18148;
   // private final double ENCODER_COUNTS_PER_METER = kEncoderCountPerRevolution / (kWheelDiameter * Math.PI);
   // in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
