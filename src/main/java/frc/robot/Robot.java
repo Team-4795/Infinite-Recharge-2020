@@ -20,8 +20,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.commands.AutoArm;
+import frc.robot.commands.ManualArmControl;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Spinner;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -31,13 +34,16 @@ import frc.robot.subsystems.Drivebase;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
+  
+  public static AutoArm autoArmCommand;
   public static RobotContainer rc;
   public static Drivebase drivebase;
   public static PowerDistributionPanel pdp;
-
   public static Arm arm;
-  public AutoArm armCommand;
+  public static Elevator elevator;
+  public static ManualArmControl armCommand;
+  public static Spinner spinner;
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -52,6 +58,7 @@ public class Robot extends TimedRobot {
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
     arm = new Arm();
+    spinner = new Spinner();
   }
 
   /**
@@ -86,15 +93,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    // Robot.rc.drive.resetHeading();
+
     m_autonomousCommand = rc.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-    armCommand = new AutoArm();
-    armCommand.schedule();
+//     autoArmCommand = new AutoArm();
+//     autoArmCommand.schedule();
   }
 
   /**
@@ -122,6 +129,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    // armCommand = new ManualArmControl();
+    // armCommand.schedule();
   }
 
   @Override

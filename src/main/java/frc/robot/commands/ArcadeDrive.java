@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import edu.wpi.first.networktables.NetworkTableInstance;
+
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Drivebase;
@@ -49,7 +50,7 @@ public class ArcadeDrive extends CommandBase {
     SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
 
     if (Robot.rc.main.getB()) {
-      // Robot.drivebase.drive(0.3, 0.2);
+//       Robot.drivebase.drive(0.3, 0.2);
     } else {
       Robot.drivebase.setMotors(forward - turn, forward + turn);
     }

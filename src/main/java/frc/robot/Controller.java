@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.drive.Vector2d;
  * - Rock Candy (1)
  *   - LX LY LT RT RX RY
  *   - A B X Y LB RB Back/LS Start/RS LJ RJ
+ * - PS4 (2)
+ *   -
+ *   -
  **/
 
 public class Controller {
@@ -30,6 +33,8 @@ public class Controller {
       type = 0; // Air Flow
     } else if (raw.getButtonCount() == 10 && raw.getAxisCount() == 6) {
       type = 1; // Rock Candy
+    } else if (raw.getButtonCount() > 13) {
+      type = 2;
     } else {
       type = 1;
       // throw new Error("Unknown controller found");
@@ -40,6 +45,8 @@ public class Controller {
   }
   public Vector2d rightJoystick() {
     return new Vector2d(
+      // removeDeadzone(raw.getRawAxis(type > 0 ? (type > 1 ? 2 : 4) : 3)),
+      // removeDeadzone(raw.getRawAxis(type > 0 ? (type > 1 ? 5 : 5) : 2)));
       removeDeadzone(raw.getRawAxis(type == 0 ? 3 : 4)),
       removeDeadzone(raw.getRawAxis(type == 0 ? 2 : 5)));
   }
@@ -72,6 +79,9 @@ public class Controller {
   }
   public boolean pressedY() {
     return raw.getRawButtonPressed(4);
+  }
+  public boolean releasedY() {
+    return raw.getRawButtonReleased(4);
   }
   public boolean leftBumper() {
     return raw.getRawButton(5);

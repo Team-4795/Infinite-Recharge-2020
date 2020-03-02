@@ -104,12 +104,4 @@ public class RobotContainer {
     
     return command;
   }
-
-public double getArmLeftJoyY() {
-	return 0;
-}
-
-public double getArmRightTrigger() {
-	return 0;
-}
 }

@@ -60,7 +60,8 @@ public class Drivebase extends SubsystemBase {
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
   private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
+  private static final int kEncoderCountPerRevolution = 18148;
+  private static final double kEncoderCountPerMeter = kEncoderCountPerRevolution / (Units.inchesToMeters(6) * Math.PI);
 
   // private final static double P = -0.009;
   // private final static double I = 0.0;
@@ -75,7 +76,6 @@ public class Drivebase extends SubsystemBase {
 
   private final double kWheelDiameter = Units.inchesToMeters(6.0);
   // private final int ENCODER_COUNTS_PER_REV = 4096;
-  private final double kEncoderCountPerRevolution = 18148;
   // private final double ENCODER_COUNTS_PER_METER = kEncoderCountPerRevolution / (kWheelDiameter * Math.PI);
   // in theory should equal: (ENCODER_COUNTS_PER_REV * 12) / (Math.PI * WHEEL_DIAMETER_IN)
   
