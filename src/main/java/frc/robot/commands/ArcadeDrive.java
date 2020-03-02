@@ -50,7 +50,7 @@ public class ArcadeDrive extends CommandBase {
     SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
 
     if (Robot.rc.main.getB()) {
-      Robot.drivebase.drive(0.3, 0.2);
+//       Robot.drivebase.drive(0.3, 0.2);
     } else {
       Robot.drivebase.setMotors(forward - turn, forward + turn);
     }
