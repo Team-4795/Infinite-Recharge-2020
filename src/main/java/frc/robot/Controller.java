@@ -31,7 +31,8 @@ public class Controller {
     } else if (raw.getButtonCount() == 10 && raw.getAxisCount() == 6) {
       type = 1; // Rock Candy
     } else {
-      throw new Error("Unknown controller found");
+      type = 1;
+      // throw new Error("Unknown controller found");
     }
   }
   public Vector2d leftJoystick() {

@@ -7,15 +7,50 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.controller.RamseteController;
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
+
+import frc.robot.subsystems.Drivebase;
 
 public class RobotContainer {
+  private static final double DEADZONE = 0.15;
+  private final double kS = 0.993;
+  private final double kV = 0.00240; 
+  private final double kA = 0.000212; 
+
   // private JoystickButton XButton, YButton, AButton, BButton, RightBumper;
   // private double value;
   // private POVButton MainDPadDown, MainDPadUp;
   public Controller main;
   public Controller arm;
   public RobotContainer() { 
+    // String trajectoryJSON = "PathWeaver/pathweaver.json" ;
+    // try {
+    //   Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+    //   Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+    // } catch (IOException ex) {
+    //   DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+    // }
     main = new Controller(Constants.CONTROLLER_MAIN);
     arm = new Controller(Constants.CONTROLLER_ARM);
     // YButton = new JoystickButton(main, 4);
@@ -41,109 +76,33 @@ public class RobotContainer {
     //AButton.whenPressed(new TurnToLine(5));
   }
 
-  // Drivebase control (Y: magnitude)
-  // public Vector2d getMainLeftJoy() {
-  //   return main.leftJoystick();
-  // }
-
-  // Drivebase control (X: magnitude)
-  // public Vector2d getMainRightJoy() {
-  //   return main.rightJoystick();
-  // }
-
-  // Controller joysticks
-  // public double getMainLeftJoyX() {
-  //   return removeDeadzone(main.getRawAxis(0));
-  // }
-  
-  // Drivebase control (magnitude)
-  // public double getMainLeftJoyY() {
-  //   return removeDeadzone(main.getRawAxis(1));
-  // }
-  
-  // Drivebase control (direction)
-  // public double getMainRightJoyX() {
-  //   return removeDeadzone(main.getRawAxis(3));
-  // }
-
-  // (unused)
-  // public double getMainRightJoyY() {
-  //   return removeDeadzone(main.getRawAxis(2));
-  // }
-
-  // Drivebase throttle, which slows down the robot but makes it turn faster
-  // public double getMainRightTrigger() {
-  //   return main.getRawButton(8) ? 1 : 0; //removeDeadzone(main.getRawAxis(3));
-  // }
-
-  // // Climber wheel actuation & outtaking
-  // public double getMainLeftTrigger() {
-  //   return removeDeadzone(main.getRawAxis(2));
-  // }
-
-  // public boolean getMainAButtonPressed() {
-  //   return main.getRawButtonPressed(1);
-  // }
-  // public boolean getMainAButton() {
-  //   return main.getRawButton(1);
-  // }
-
-  // public boolean getMainBButtonPressed() {
-  //   return main.getRawButtonPressed(2);
-  // }
-  // public boolean getMainBButton() {
-  //   return main.getRawButton(2);
-  // }
-
-  // public boolean getMainLeftBumperPressed() {
-  //   return main.getRawButtonPressed(5);
-  // }
-
-  // public boolean getArmLeftBumper() {
-  //   return arm.getRawButton(5);
-  // }
-
-  // public boolean getArmRightBumper() {
-  //   return arm.getRawButton(6);
-  // }
-
-  // // Toggles which way is "forward" for drivebase
-  // public boolean getMainRightBumperPressed() {
-  //   return main.getRawButtonPressed(6);
-  // }
-
-  // public boolean getArmXButton() {
-  //   return arm.getRawButton(3);
-  // }
-
-  // public boolean getArmAButton() {
-  //   return arm.getRawButton(1);
-  // }
-
-  // public boolean getArmYButton() {
-  //   return arm.getRawButton(4);
-  // }
-
-  // public boolean getMainYButtonPressed() {
-  //   return main.getRawButtonPressed(4);
-  // }
-
-  // // Arm control
-  // public double getArmLeftJoyY() {
-  //   return removeDeadzone(arm.getRawAxis(1));
-  // }
-
-  // // Arm throttle
-  // public double getArmRightTrigger() {
-  //   return removeDeadzone(arm.getRawAxis(3));
-  // }
-
-  // public double getArmLeftTrigger() {
-  //   return removeDeadzone(arm.getRawAxis(2));
-  // }
-
   public Command getAutonomousCommand() {
-	  return null;
+    Robot.drivebase.resetHeading();
+    var autoVoltageConstraint =
+        new DifferentialDriveVoltageConstraint(
+            new SimpleMotorFeedforward(kS, kV, kA), Robot.drivebase.getKinematics(), 12
+        );
+
+    TrajectoryConfig config = new TrajectoryConfig(Units.feetToMeters(2), Units.feetToMeters(2));
+    config.setKinematics(Robot.drivebase.getKinematics()).addConstraint(autoVoltageConstraint);
+    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+      Arrays.asList(
+          new Pose2d(0.0, 0.0, new Rotation2d(0.0)),
+          new Pose2d(-2.0, -2.0, new Rotation2d(0.0))),
+          config);
+    RamseteCommand command = new RamseteCommand(trajectory, 
+                  Robot.drivebase::getPose, 
+                  new RamseteController(2.0, 0.8), 
+                  Robot.drivebase.getFeedForward(), 
+                  Robot.drivebase.getKinematics(), 
+                  Robot.drivebase::getSpeeds, 
+                  Robot.drivebase.getLeftPID(), 
+                  Robot.drivebase.getRightPID(), 
+                  Robot.drivebase::setOutput, 
+                  Robot.drivebase);
+
+    
+    return command;
   }
 
 public double getArmLeftJoyY() {

@@ -24,7 +24,7 @@ public class ManualArmControl extends CommandBase {
 
   @Override
   public void execute() {
-    throttle = 0.55 - 0.3 * Robot.oi.arm.rightTrigger();
+    throttle = 0.55 - 0.3 * Robot.rc.arm.rightTrigger();
     Robot.arm.setArm(throttle);
   }
   

@@ -1,0 +1,15 @@
+{
+    "rightControllerTypes": ["WPI_TalonSRX", "WPI_TalonSRX"],
+    "leftControllerTypes": ["WPI_TalonSRX", "WPI_TalonSRX"],
+    "leftMotorPorts": [2, 3],
+    "rightMotorPorts": [4, 5],
+    "leftMotorsInverted": [false, false],
+    "rightMotorsInverted": [true, true],
+    "wheelDiameter": 6,
+    "encoderEPR": 4096,
+    "leftEncoderInverted": false,
+    "rightEncoderInverted": false,
+    "gyroType": "NavX",
+    "gyroPort": ""
+}
+
