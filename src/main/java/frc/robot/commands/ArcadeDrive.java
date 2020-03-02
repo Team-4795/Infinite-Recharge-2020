@@ -11,7 +11,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import edu.wpi.first.networktables.NetworkTableInstance;
+
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Drivebase;
 
 public class ArcadeDrive extends CommandBase {
 
@@ -32,13 +35,13 @@ public class ArcadeDrive extends CommandBase {
 
   @Override
   public void execute() {
-    double throttle = Robot.oi.main.rightTrigger();
-    double forward = Robot.oi.main.leftJoystick().y * (0.85 - 0.65 * throttle);
-    double turn = Robot.oi.main.rightJoystick().x
+    double throttle = Robot.rc.main.rightTrigger();
+    double forward = Robot.rc.main.leftJoystick().y * (0.85 - 0.65 * throttle);
+    double turn = Robot.rc.main.rightJoystick().x
       * (1 + 0.3 * throttle) * (0.85 - 0.65 * throttle) // maybe replace this with 0.85 - 0.55 * throttle instead of a quadratic 
       * (forward == 0 ? 0.6 : 0.35);
 
-    if (Robot.oi.main.rightBumperPressed()) reversed = !reversed;
+    if (Robot.rc.main.rightBumperPressed()) reversed = !reversed;
     if (reversed) {
       forward *= -1;
     }
@@ -49,7 +52,7 @@ public class ArcadeDrive extends CommandBase {
     turn += SmartDashboard.getNumber("ball_x", 0) * Robot.oi.main.leftTrigger() / 3.5;// * SmartDashboard.getNumber("ball_size", 0) / ((Robot.oi.main.leftJoystick().y + 1) * 3);
     Robot.drivebase.setMotors(forward - turn, forward + turn);
 
-    if (Robot.oi.main.backButtonPressed()) {
+    if (Robot.rc.main.backButtonPressed()) {
       System.exit(0);
     }
     //   if (Robot.oi.getMainAButtonPressed()) {

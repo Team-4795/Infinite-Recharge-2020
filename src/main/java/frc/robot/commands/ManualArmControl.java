@@ -8,11 +8,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+
 import frc.robot.Robot;
 
 public class ManualArmControl extends CommandBase {
-
-  private double throttle;
 
   public ManualArmControl() {
     addRequirements(Robot.arm);
@@ -24,8 +23,9 @@ public class ManualArmControl extends CommandBase {
 
   @Override
   public void execute() {
-    throttle = 0.55 - 0.3 * Robot.oi.arm.rightTrigger();
-    Robot.arm.setArm(throttle);
+    Robot.arm.setArm(Robot.rc.arm.leftJoystick().y);
+    Robot.arm.setRoller((Robot.rc.arm.getY() ? 1 : 0) - (Robot.rc.arm.getX() ? 1 : 0));
+//     throttle = 0.55 - 0.3 * Robot.rc.arm.rightTrigger();
   }
   
   @Override

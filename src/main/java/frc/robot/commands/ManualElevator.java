@@ -8,16 +8,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
 import frc.robot.Robot;
 
-public class AutoArm extends CommandBase {
+public class ManualElevator extends CommandBase {
   /**
-   * Creates a new AutoArm.
+   * Creates a new ManualElevator.
    */
-  public AutoArm() {
-    addRequirements(Robot.arm);
+  public ManualElevator() {
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(Robot.elevator); 
   }
 
   // Called when the command is initially scheduled.
@@ -28,8 +27,7 @@ public class AutoArm extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // Robot.arm.
-
+    Robot.elevator.set((Robot.rc.arm.getB() ? 1 : 0) - (Robot.rc.arm.getA() ? 1 : 0));
   }
 
   // Called once the command ends or is interrupted.
