@@ -25,7 +25,7 @@ public class ManualArmControl extends CommandBase {
   public void execute() {
     Robot.arm.setArm(Robot.rc.arm.leftJoystick().y);
     Robot.arm.setRoller((Robot.rc.arm.getY() ? 1 : 0) - (Robot.rc.arm.getX() ? 1 : 0));
-    throttle = 0.55 - 0.3 * Robot.rc.arm.rightTrigger();
+//     throttle = 0.55 - 0.3 * Robot.rc.arm.rightTrigger();
   }
   
   @Override
