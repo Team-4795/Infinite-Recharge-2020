@@ -49,11 +49,8 @@ public class ArcadeDrive extends CommandBase {
     SmartDashboard.putNumber("Left Encoder Count", Robot.drivebase.getLeftEncoderCount());
     SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
 
-    if (Robot.rc.main.getB()) {
-//       Robot.drivebase.drive(0.3, 0.2);
-    } else {
-      Robot.drivebase.setMotors(forward - turn, forward + turn);
-    }
+    turn += SmartDashboard.getNumber("ball_x", 0) * Robot.rc.main.leftTrigger() / 3.5;// * SmartDashboard.getNumber("ball_size", 0) / ((Robot.oi.main.leftJoystick().y + 1) * 3);
+    Robot.drivebase.setMotors(forward - turn, forward + turn);
 
     if (Robot.rc.main.backButtonPressed()) {
       System.exit(0);
