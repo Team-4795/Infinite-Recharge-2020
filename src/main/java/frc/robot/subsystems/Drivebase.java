@@ -8,22 +8,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-//import com.kauailabs.navx.frc.AHRS;
-// import com.kauailabs.navx.frc.AHRS.BoardAxis;
-// import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
-// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -35,14 +23,17 @@ public class Drivebase extends SubsystemBase {
   public static final double kMaxSpeed = 3.0; // meters per second
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
-  private static final double kTrackWidth = 0.381 * 2; // meters
-  private static final int kEncoderCountPerRevolution = 18148;
-  private static final double kEncoderCountPerMeter = kEncoderCountPerRevolution / (Units.inchesToMeters(6) * Math.PI);
-
+  // private static final double kTrackWidth = 0.381 * 2; // meters
+  private static final double kEncoderCountPerMeter = 18148 / (Units.feetToMeters(6) * Math.PI); // TODO: tune
   private static final double kP = 1; // TODO: tune PID
   private static final double kI = 0;
   private static final double kD = 0;
   private static final double kF = 0;
+  private static final double kEncoderCountPerFeet = 2050/1.57;
+
+  public Encoder leftMotorEncoder;
+  public Encoder rightMotorEncoder;
+
 
   // private final static double P = -0.009;
   // private final static double I = 0.0;
@@ -67,23 +58,19 @@ public class Drivebase extends SubsystemBase {
   // private final VictorSPX rightMotorThree;
   // public final PIDController turnController;
 
-  private final AnalogGyro m_gyro = new AnalogGyro(0);
-
-  private final PIDController m_leftPIDController = new PIDController(kP, kI, kD, kF);
-  private final PIDController m_rightPIDController = new PIDController(kP, kI, kD, kF);
-
-  private final DifferentialDriveKinematics m_kinematics
-      = new DifferentialDriveKinematics(kTrackWidth);
-
-  private final DifferentialDriveOdometry m_odometry;
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
+  public boolean climbTime = false; 
+  public boolean hasMoved;
 
   public Drivebase() {
-    m_gyro.reset();
+    // Set the distance per pulse for the drive encoders. We can simply use the
+    // distance traveled for one rotation of the wheel divided by the encoder
+    // resolution.
+    // m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    // m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
 
-    m_odometry = new DifferentialDriveOdometry(getAngle());
+    // m_leftEncoder.reset();
+    // m_rightEncoder.reset();
+
 
     // turnController = new PIDController(P, I, D, Robot.ahrs, this);
     // turnController.setInputRange(-180.0f, 180.0f);
@@ -122,22 +109,26 @@ public class Drivebase extends SubsystemBase {
     // Robot.initVictor(rightMotorTwo);
     // Robot.initVictor(rightMotorThree);
 
-    leftMotor.setInverted(false);
-    leftMotorFollower.setInverted(false);
+    leftMotor.setInverted(true);
+    leftMotorFollower.setInverted(true);
     leftMotorFollower.follow(leftMotor);
 
-    rightMotor.setInverted(true);
-    rightMotorFollower.setInverted(true);
+    rightMotor.setInverted(false);
+    rightMotorFollower.setInverted(false);
     rightMotorFollower.follow(rightMotor);
     
-    leftMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-    rightMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    leftMotorEncoder = new Encoder(3,4); //2020, 2100, 2030
+    rightMotorEncoder = new Encoder(7,8);
 
-    leftMotor.setSelectedSensorPosition(0);
-    rightMotor.setSelectedSensorPosition(0);
+    // leftMotorEncoder.setReverseDirection(true);
+    rightMotorEncoder.setReverseDirection(true);
+    // leftMotor.setSelectedSensorPosition(0);
+    // rightMotor.setSelectedSensorPosition(0);
   }
 
   public void setMotors(double left, double right) {
+    SmartDashboard.putNumber("I LOVE SELF PLEASURE", leftMotorEncoder.getDistance());
+    SmartDashboard.putNumber("I LOVE SELF PLEASURE3", rightMotorEncoder.getDistance());
     leftMotor.set(ControlMode.PercentOutput, left);
     rightMotor.set(ControlMode.PercentOutput, right);
   }
@@ -156,83 +147,39 @@ public class Drivebase extends SubsystemBase {
     return rightMotor.getSelectedSensorPosition() / kEncoderCountPerMeter;
   }
 
-  // //should give velocity in ft per second
-  // public double getLeftVelocity() {
-  //   return leftMotorOne.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
-  // }
+  // should give velocity in ft per second
+  public double getLeftVelocity() {
+    return leftMotor.getSelectedSensorVelocity() * 10 / kEncoderCountPerMeter;
+  }
 
-  // public double getRightVelocity() {
-  //   return rightMotorOne.getSelectedSensorVelocity() * 10 / ENCODER_COUNTS_PER_FT;
-  // }
-
-  // public void TurnToAngle(double angle) {
-  //   Robot.ahrs.reset();
-  //   turnController.reset();
-  //   turnController.setSetpoint(angle);
-  //   turnController.enable();
-  // }
+  public double getRightVelocity() {
+    return rightMotor.getSelectedSensorVelocity() * 10 / kEncoderCountPerMeter;
+  }
   
-  // public void driveFeet(double feet) {
-  //   this.resetEncoders();
-  //   leftMotorOne.set(ControlMode.MotionMagic, -feet * ENCODER_COUNTS_PER_FT);
-  //   rightMotorOne.set(ControlMode.MotionMagic, -feet * ENCODER_COUNTS_PER_FT);
-  // }
+  public void driveFeet(double feet) {
+    hasMoved = false;
+    resetEncoders();
+    // while (leftMotorEncoder.getDistance() < feet * kEncoderCountPerFeet) {
+    //   setMotors(-0.2, -0.2);
+    //   Robot.arm.goToPosition();
+    // }
+    // setMotors(0.0, 0.0);
+    // Robot.arm.goToPosition();
+    // Robot.arm.setRoller(-1);
+    if (leftMotorEncoder.getDistance() < feet * kEncoderCountPerFeet) {
+      setMotors(-0.215, -0.25);
+      Robot.arm.goToPosition();
+    } else {
+      hasMoved = true;
+      Robot.drivebase.setMotors(0.0, 0.0);
+    }
+
+    
+  }
   
-  // public void resetEncoders() {
-  //   rightMotorOne.setSelectedSensorPosition(0);
-  //   leftMotorOne.setSelectedSensorPosition(0);
-  // }
-
-  /**
-   * Constructs a differential drive object.
-   * Sets the encoder distance per pulse and resets the gyro.
-   */
-
-  /**
-   * Returns the angle of the robot as a Rotation2d.
-   *
-   * @return The angle of the robot.
-   */
-  public Rotation2d getAngle() {
-    // Negating the angle because WPILib gyros are CW positive.
-    return Rotation2d.fromDegrees(-m_gyro.getAngle());
-  }
-
-  /**
-   * Sets the desired wheel speeds.
-   *
-   * @param speeds The desired wheel speeds.
-   */
-  public void setSpeeds(DifferentialDriveWheelSpeeds speeds) {
-    double leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
-    double rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
-
-    double leftOutput = m_leftPIDController.calculate(
-      leftMotor.getSelectedSensorVelocity() / kEncoderCountPerMeter,
-        speeds.leftMetersPerSecond);
-    double rightOutput = m_rightPIDController.calculate(
-      rightMotor.getSelectedSensorVelocity() / kEncoderCountPerMeter,
-        speeds.rightMetersPerSecond);
-    leftMotor.set(ControlMode.PercentOutput, leftOutput + leftFeedforward);
-    rightMotor.set(ControlMode.PercentOutput, rightOutput + rightFeedforward);
-  }
-
-  /**
-   * Drives the robot with the given linear velocity and angular velocity.
-   *
-   * @param xSpeed Linear velocity in m/s.
-   * @param rot    Angular velocity in rad/s.
-   */
-  public void drive(double xSpeed, double rot) {
-    DifferentialDriveWheelSpeeds wheelSpeeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0.0, rot));
-    setSpeeds(wheelSpeeds);
-  }
-
-  /**
-   * Updates the field-relative position.
-   */
-  public void updateOdometry() {
-    m_odometry.update(getAngle(), getLeftEncoderMeters(), getRightEncoderMeters());
+  public void resetEncoders() {
+    // rightMotor.setSelectedSensorPosition(0);
+    // leftMotor.setSelectedSensorPosition(0);
   }
 
   @Override

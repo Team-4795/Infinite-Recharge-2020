@@ -9,22 +9,19 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-// import edu.wpi.first.networktables.NetworkTableInstance;
-
 import frc.robot.Robot;
+import java.util.Date;
 
 public class ArcadeDrive extends CommandBase {
 
   private boolean reversed;
-  // private int temp;
-  // private double maxVel;
-  // private double pastVel;
-  // private double maxAccel;
+  private boolean ballz;
+  private Date currentTime;
 
   public ArcadeDrive() {
     addRequirements(Robot.drivebase);
     reversed = false;
+    ballz = true;
   }
 
   @Override
@@ -33,41 +30,29 @@ public class ArcadeDrive extends CommandBase {
 
   @Override
   public void execute() {
+    currentTime = new Date();
+    if (Robot.rc.main.pressedY()) {
+      // SmartDashboard.putNumber("DATE_TIME", Robot.startTime.getTime() - currentTime.getTime()); 
+      Robot.drivebase.climbTime = !Robot.drivebase.climbTime;
+    }
     double throttle = Robot.rc.main.rightTrigger();
     double forward = Robot.rc.main.leftJoystick().y * (0.85 - 0.65 * throttle);
     double turn = Robot.rc.main.rightJoystick().x
       * (1 + 0.3 * throttle) * (0.85 - 0.65 * throttle) // maybe replace this with 0.85 - 0.55 * throttle instead of a quadratic 
-      * (forward == 0 ? 0.6 : 0.35);
+      * (forward == 0 ? 0.65 : 0.5);
 
     if (Robot.rc.main.rightBumperPressed()) reversed = !reversed;
-    if (reversed) {
-      forward *= -1;
-    }
-    SmartDashboard.putBoolean("Reversed Drivebase", reversed);
-    SmartDashboard.putNumber("Left Encoder Count", Robot.drivebase.getLeftEncoderCount());
-    SmartDashboard.putNumber("Right Encoder Count", Robot.drivebase.getRightEncoderCount());
+    if (reversed) forward *= -1;
 
-    if (Robot.rc.main.getB()) {
-      Robot.drivebase.drive(0.3, 0.2);
-    } else {
-      Robot.drivebase.setMotors(forward - turn, forward + turn);
-    }
+    if (Robot.rc.arm.pressedY()) ballz = true;
+    if (Robot.rc.arm.pressedX()) ballz = false;
+    SmartDashboard.putBoolean("target_balls", ballz);
 
-    if (Robot.rc.main.backButtonPressed()) {
-      System.exit(0);
-    }
-    //   if (Robot.oi.getMainAButtonPressed()) {
-    //     temp = Robot.drivebase.getLeftEncoderCount();
-    //   }
-    //   int relativeOver = 18148 - Robot.drivebase.getLeftEncoderCount() + temp;
-    //   double speed = Math.min(0.2, relativeOver / 18148.0);
-    //   Robot.drivebase.setMotors(speed, speed);
-
-    // double vel = Robot.drivebase.getLeftVelocity();
-    // maxVel = Math.abs(vel) > Math.abs(maxVel) ? vel : maxVel;
-    // SmartDashboard.putNumber("Max Velocity", maxVel);
-    // maxAccel = Math.abs(vel - pastVel) > Math.abs(maxAccel) ? (vel - pastVel) : maxAccel;
-    // pastVel = vel;
+    if (ballz) turn += SmartDashboard.getNumber("ball_x", 0) * Robot.rc.main.leftTrigger() / 4.5 * (1 - (forward / 2));
+    if (!ballz) turn += SmartDashboard.getNumber("target_x", 0) * Robot.rc.main.leftTrigger() / 4.5 * (1 - (forward / 2));
+    
+    // if (Robot.drivebase.climbTime) turn *= 0.5;
+    Robot.drivebase.setMotors(forward * 0.9 - turn, forward + turn);
   }
 
   @Override

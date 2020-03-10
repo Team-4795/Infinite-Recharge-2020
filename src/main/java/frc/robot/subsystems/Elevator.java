@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems;
 
+import frc.robot.commands.ManualElevator;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -17,6 +19,11 @@ import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANDigitalInput;
+import com.revrobotics.CANDigitalInput.LimitSwitch;
+import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
+
+import java.util.Date;
 
 import frc.robot.Constants;
 
@@ -42,15 +49,20 @@ public class Elevator extends SubsystemBase {
   private final static double kD = 0.0000000;
   private final static double kF = 0.0002;
   private final static double kTolerance = 5.0;
+  private CANDigitalInput topLimit;
+  private Date currentTime;
 
   public Elevator() {
     elevatorMotor = new CANSparkMax(Constants.ELEVATOR_MOTOR_SPARK, CANSparkMaxLowLevel.MotorType.kBrushless);
     elevatorController = new CANPIDController(elevatorMotor);
     elevatorEncoder = new CANEncoder(elevatorMotor);
+    
+    topLimit = new CANDigitalInput(elevatorMotor, LimitSwitch.kForward, LimitSwitchPolarity.kNormallyOpen);
 
     elevatorMotor.setIdleMode(IdleMode.kBrake);
     elevatorMotor.setOpenLoopRampRate(0.5);
     elevatorMotor.setClosedLoopRampRate(0.5);
+    
     // ArmMotor.setParameter(ConfigParameter.kHardLimitRevEn, true);
     // ArmMotor.setParameter(ConstantParameter.kCanID,
     // RobotContainer.ARM_MOTOR.value);
@@ -65,6 +77,7 @@ public class Elevator extends SubsystemBase {
     elevatorController.setSmartMotionMaxAccel(2750, 0);
     elevatorController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
     elevatorController.setSmartMotionAllowedClosedLoopError(1.0, 0);
+    elevatorEncoder.setPosition(0);
   }
 
   public void setUpPosition(int type) {
@@ -83,12 +96,32 @@ public class Elevator extends SubsystemBase {
   }
 
   public void set(double speed) {
+    SmartDashboard.putNumber("elevatorEncoder.position", elevatorEncoder.getPosition());
+    // negative speed is going up, pos speed is going down
+    if (elevatorEncoder.getPosition() < -150 && speed < 0) {
+      speed = speed * 0.5;
+      if (elevatorEncoder.getPosition() < -190) {
+        speed = 0;
+      }
+    }
+
+    if (elevatorEncoder.getPosition() > -40 && speed > 0) {
+      speed = speed * 0.5;
+      if (elevatorEncoder.getPosition() > -15) {
+        speed = 0;
+      }
+    }
+    SmartDashboard.putNumber("YEY", speed);
+    SmartDashboard.putNumber("CURRENT", elevatorMotor.getOutputCurrent());
     elevatorMotor.set(speed);
+    
+   
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Elevator Position (PID)", elevatorEncoder.getPosition());
+    SmartDashboard.putNumber("Elevator Position (PID)", 3);
+    setDefaultCommand(new ManualElevator());
   }
 }

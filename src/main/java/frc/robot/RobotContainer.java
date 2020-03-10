@@ -17,7 +17,8 @@ public class RobotContainer {
   public Controller arm;
   public RobotContainer() { 
     main = new Controller(Constants.CONTROLLER_MAIN);
-    arm = new Controller(Constants.CONTROLLER_ARM);
+    arm = new Controller(Constants.CONTROLLER_ARM); 
+
     // YButton = new JoystickButton(main, 4);
     // AButton = new JoystickButton(main, 1);
     // XButton = new JoystickButton(main, 3);
@@ -145,4 +146,12 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
 	  return null;
   }
+
+public double getArmLeftJoyY() {
+	return 0;
+}
+
+public double getArmRightTrigger() {
+	return 0;
+}
 }

@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.drive.Vector2d;
  **/
 
 public class Controller {
-  private static final double DEADZONE = 0.1;
+  private static final double DEADZONE = 0.05;
   private static double removeDeadzone(double value) {
     return Math.abs(value) > DEADZONE
       ? (Math.copySign(Math.abs(value) - DEADZONE, value) / (1.0 - DEADZONE))
@@ -36,7 +36,8 @@ public class Controller {
     } else if (raw.getButtonCount() > 13) {
       type = 2;
     } else {
-      throw new Error("Unknown controller found");
+      // throw new Error("Unknown controller found");
+      type = 2;
     }
   }
   public Vector2d leftJoystick() {
@@ -78,9 +79,6 @@ public class Controller {
   }
   public boolean pressedY() {
     return raw.getRawButtonPressed(4);
-  }
-  public boolean releasedY() {
-    return raw.getRawButtonReleased(4);
   }
   public boolean leftBumper() {
     return raw.getRawButton(5);

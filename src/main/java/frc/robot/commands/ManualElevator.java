@@ -7,13 +7,18 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
+
+import java.util.Date;
 
 public class ManualElevator extends CommandBase {
   /**
    * Creates a new ManualElevator.
    */
+
+   private Date currentTime;
   public ManualElevator() {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(Robot.elevator); 
@@ -27,12 +32,14 @@ public class ManualElevator extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Robot.elevator.set((Robot.rc.arm.getB() ? 1 : 0) - (Robot.rc.arm.getA() ? 1 : 0));
+    
+    if(Robot.drivebase.climbTime) Robot.elevator.set((Robot.rc.arm.getB() ? -.7 : 0) + (Robot.rc.arm.getA() ? 1 : 0));
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    
   }
 
   // Returns true when the command should end.

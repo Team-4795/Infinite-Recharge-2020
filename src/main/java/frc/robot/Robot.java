@@ -12,18 +12,26 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+// import com.sun.org.apache.xpath.internal.operations.String;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandGroupBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+// import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.commands.AutoArm;
+import frc.robot.commands.DriveForwardAuto;
+import frc.robot.commands.DriveForwardOuttake;
 import frc.robot.commands.ManualArmControl;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivebase;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Spinner;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+// import java.util.Boolean;
+import java.util.Date;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -34,6 +42,8 @@ import frc.robot.subsystems.Spinner;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  private SequentialCommandGroup driveForwardOuttake;
+
   public static AutoArm autoArmCommand;
   public static RobotContainer rc;
   public static Drivebase drivebase;
@@ -41,7 +51,9 @@ public class Robot extends TimedRobot {
   public static Arm arm;
   public static Elevator elevator;
   public static ManualArmControl armCommand;
-  public static Spinner spinner;
+  public static DriveForwardAuto dfa;
+  public static Date startTime;
+  public static SendableChooser autoSelector;
 
 
   /**
@@ -50,6 +62,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    autoSelector = new SendableChooser<String>();
+    // autoSelector.addOption("Outtake?", new Boolean(true));
+    // SmartDashboard.putBoolean("OUTTAKE?", false);
+    // SmartDashboard.putData(autoSelector);
+    SmartDashboard.putBoolean("Outtake?", true);
+    SmartDashboard.putBoolean("Intake?", true);
     // Instantiate our RobotContainer. This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     rc = new RobotContainer();
@@ -57,7 +75,9 @@ public class Robot extends TimedRobot {
     // ahrs = new AHRS(SPI.Port.kMXP);
     drivebase = new Drivebase();
     arm = new Arm();
-    spinner = new Spinner();
+    elevator = new Elevator();
+    
+    
   }
 
   /**
@@ -92,14 +112,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = rc.getAutonomousCommand();
 
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
-    autoArmCommand = new AutoArm();
-    autoArmCommand.schedule();
+    startTime = new Date();
+    driveForwardOuttake = new DriveForwardOuttake();
+    driveForwardOuttake.schedule();
   }
 
   /**

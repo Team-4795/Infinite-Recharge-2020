@@ -28,5 +28,7 @@ public final class Constants {
   public final static int ARM_MOTOR = 10;
   public final static int ARM_SPINNER = 8;
   public final static int ARM_ROLLER = 9;
+  // public final static int INTAKE_MOTOR = 11;
   public final static int ELEVATOR_MOTOR_SPARK = 20;
+  public final static int SErVo_ChAnIeL = 1;
 }
